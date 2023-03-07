@@ -2,14 +2,6 @@
 
 A real-time, synchronous junior.guru Discord bot.
 
-## Installation
-
-... TODO
-
-## Deployment
-
-... TODO
-
 ## Purpose
 
 All junior.guru automation happens asynchronously (with up-to-24h delay), except of the following tasks provided by this bot:
@@ -19,6 +11,16 @@ All junior.guru automation happens asynchronously (with up-to-24h delay), except
 - Creating threads for #můj-dnešní-objev
 
 _Please, update the above list if adding features._
+
+## Installation
+
+... TODO
+
+## Deployment
+
+... TODO
+
+https://jonahlawrence.hashnode.dev/hosting-a-python-discord-bot-for-free-with-flyio
 
 ## Design decisions
 
