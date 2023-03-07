@@ -6,6 +6,10 @@ A real-time, synchronous junior.guru Discord bot.
 
 ... TODO
 
+## Deployment
+
+... TODO
+
 ## Purpose
 
 All junior.guru automation happens asynchronously (with up-to-24h delay), except of the following tasks provided by this bot:
