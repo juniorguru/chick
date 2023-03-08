@@ -21,9 +21,10 @@ _Please, update the above list if adding features._
 
 ## Development
 
--   Set the `DISCORD_API_TOKEN` environment variable to your Discord bot token.
+-   Set the `DISCORD_API_KEY` environment variable to your Discord bot token.
     Using [direnv](https://direnv.net/) might help setting environment variables automatically in your shell when you navigate to the project directory.
--
+-   Run `poetry run jgc` to start the bot.
+-   Press <kbd>Ctrl+C</kbd> to stop the bot.
 
 ## Deployment
 

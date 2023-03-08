@@ -8,7 +8,7 @@ from discord.ext import commands
 DAYS = ["Pondělní", "Úterní", "Středeční",
         "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
-DISCORD_API_TOKEN = os.environ['DISCORD_API_TOKEN']
+DISCORD_API_KEY = os.getenv('DISCORD_API_KEY')
 
 
 bot = commands.Bot()
@@ -53,7 +53,7 @@ async def create_pvp_thread(message: discord.Message) -> None:
     weekday = datetime.now().weekday()
 
     await message.create_thread(name="{} past na {}".format(DAYS[weekday], message.author.name))
-    await message.add_reaction("🐣")
+    # await message.add_reaction("🐣")
 
 
 async def create_mdo_thread(message: discord.Message) -> None:
@@ -64,7 +64,7 @@ async def create_mdo_thread(message: discord.Message) -> None:
     weekday = datetime.now().weekday()
 
     await message.create_thread(name="{} objev od {}".format(DAYS[weekday], message.author.name))
-    await message.add_reaction("🐣")
+    # await message.add_reaction("🐣")
 
 
 @bot.event
@@ -77,9 +77,11 @@ async def on_message(message: discord.Message) -> None: # Message was sent
 
     channel_name = message.channel.name
 
-    if channel_name == "ahoj":
-        await create_ahoj_thread(message)
-    elif channel_name == "past-vedle-pasti":
+    # TODO let's start with less important channels first
+    # if channel_name == "ahoj":
+    #     await create_ahoj_thread(message)
+    # elif
+    if channel_name == "past-vedle-pasti":
         await create_pvp_thread(message)
     elif channel_name == "můj-dnešní-objev":
         await create_mdo_thread(message)
@@ -92,4 +94,5 @@ async def on_thread_create(thread: discord.Thread) -> None:
         await ahoj_thread_handler(thread)
 
 
-bot.run(DISCORD_API_TOKEN)
+def main():
+    bot.run(DISCORD_API_KEY)

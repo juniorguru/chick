@@ -9,6 +9,9 @@ homepage = "https://junior.guru/club/"
 repository = "https://github.com/juniorguru/juniorguru-chick/"
 packages = [{include = "juniorguru_chick"}]
 
+[tool.poetry.scripts]
+jgc = "juniorguru_chick.bot:main"
+
 [tool.poetry.dependencies]
 python = "3.10.*"
 py-cord = "2.4.0"
