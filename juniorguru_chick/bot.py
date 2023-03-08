@@ -19,7 +19,6 @@ logging.basicConfig()
 logger = logging.getLogger("chick")
 logger.setLevel(logging.INFO)
 
-logger.info("Start")
 
 def is_thread(message: discord.Message) -> bool:
     """Checks if a message is thread"""
@@ -110,4 +109,5 @@ async def on_message(message: discord.Message) -> None: # Message was sent
 
 
 def main():
+    logger.info("Starting the bot")
     bot.run(DISCORD_API_KEY)
