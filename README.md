@@ -28,7 +28,17 @@ _Please, update the above list if adding features._
 
 ## Deployment
 
-TODO https://jonahlawrence.hashnode.dev/hosting-a-python-discord-bot-for-free-with-flyio
+The bot is deployed to [fly.io](https://fly.io/).
+Everything related to deployment is in the `Dockerfile`.
+There's also `fly.toml`, but that's something the `flyctl` has generated and only they know what it is good for.
+
+-   Have a hobby account at [fly.io](https://fly.io/).
+-   Have a `flyctl` installed and be logged in.
+-   Set the environment variable using `flyctl secrets set DISCORD_API_KEY=...`
+-   Run `flyctl launch` in the project directory.
+-   Run `flyctl deploy` if not deployed already.
+
+_Inspired by [Hosting a Python Discord Bot for Free with Fly.io](https://jonahlawrence.hashnode.dev/hosting-a-python-discord-bot-for-free-with-flyio) by Jonah Lawrence._
 
 ## Design decisions
 
