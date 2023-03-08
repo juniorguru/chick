@@ -22,7 +22,7 @@ def is_thread(message: discord.Message) -> bool:
 # TODO let's start with less important channels first
 # async def create_ahoj_thread(message: discord.Message) -> None:
 #     """Creates a thread for a message in #ahoj, ahoj_thread_handler will catch the creation"""
-#     thread_name = "Ahoj {}!".format(message.author.name)
+#     thread_name = "Ahoj {}!".format(message.author.display_name)
 #
 #     if is_thread(message):
 #         return
@@ -37,7 +37,7 @@ def is_thread(message: discord.Message) -> bool:
 # async def ahoj_thread_handler(thread: discord.Thread) -> None:
 #     """Called when a thread is created in #ahoj. Kuře-made threads included"""
 #     message = thread.starting_message
-#     member_name = message.author.name
+#     member_name = message.author.display_name
 #     thread_name = "Ahoj {}!".format(member_name)
 #
 #     await thread.edit(name=thread_name)
@@ -54,7 +54,7 @@ async def create_pvp_thread(message: discord.Message) -> None:
 
     weekday = datetime.now().weekday()
 
-    await message.create_thread(name="{} past na {}".format(DAYS[weekday], message.author.name))
+    await message.create_thread(name="{} past na {}".format(DAYS[weekday], message.author.display_name))
     # await message.add_reaction("🐣")
 
 
@@ -65,7 +65,7 @@ async def create_mdo_thread(message: discord.Message) -> None:
 
     weekday = datetime.now().weekday()
 
-    await message.create_thread(name="{} objev od {}".format(DAYS[weekday], message.author.name))
+    await message.create_thread(name="{} objev od {}".format(DAYS[weekday], message.author.display_name))
     # await message.add_reaction("🐣")
 
 
