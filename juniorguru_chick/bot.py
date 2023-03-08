@@ -55,7 +55,6 @@ async def create_pvp_thread(message: discord.Message) -> None:
     weekday = datetime.now().weekday()
 
     await message.create_thread(name="{} past na {}".format(DAYS[weekday], message.author.display_name))
-    # await message.add_reaction("🐣")
 
 
 async def create_mdo_thread(message: discord.Message) -> None:
@@ -66,7 +65,6 @@ async def create_mdo_thread(message: discord.Message) -> None:
     weekday = datetime.now().weekday()
 
     await message.create_thread(name="{} objev od {}".format(DAYS[weekday], message.author.display_name))
-    # await message.add_reaction("🐣")
 
 
 @bot.event
