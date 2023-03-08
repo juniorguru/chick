@@ -44,6 +44,14 @@ The bot is deployed to [fly.io](https://fly.io/).
 Everything related to deployment is in the `Dockerfile`.
 There's also `fly.toml`, but that's something the `flyctl` has generated and only they know what it is good for.
 
+There is no need to deploy this bot manually.
+Everything merged to the `main` branch of the GitHub repo gets automatically deployed to Fly.
+
+For this to work, the output of `flyctl auth token` must be set as `FLY_API_KEY` secret in the GitHub repo settings.
+The rest of the setup is in `.github/workflows/build.yml`.
+
+If you insist to deploy manually from your local machine, follow these steps:
+
 -   Have a hobby account at [fly.io](https://fly.io/).
 -   Have a `flyctl` installed and be logged in.
 -   Set the environment variable using `flyctl secrets set DISCORD_API_KEY=...`
@@ -51,11 +59,3 @@ There's also `fly.toml`, but that's something the `flyctl` has generated and onl
 -   Run `flyctl deploy` if not deployed already.
 
 _Inspired by [Hosting a Python Discord Bot for Free with Fly.io](https://jonahlawrence.hashnode.dev/hosting-a-python-discord-bot-for-free-with-flyio) by Jonah Lawrence._
-
-## Continuous deployment
-
-There is no need to deploy this bot manually.
-Everything merged to the `main` branch of the GitHub repo gets automatically deployed to Fly.
-
-For this to work, the output of `flyctl auth token` must be set as `FLY_API_KEY` secret in the GitHub repo settings.
-The rest of the setup is in `.github/workflows/build.yml`.
