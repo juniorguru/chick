@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import logging
 
 import discord
 from discord.ext import commands
@@ -13,6 +14,12 @@ DISCORD_API_KEY = os.getenv('DISCORD_API_KEY')
 
 bot = commands.Bot()
 
+logging.basicConfig()
+
+logger = logging.getLogger("chick")
+logger.setLevel(logging.INFO)
+
+logger.info("Start")
 
 def is_thread(message: discord.Message) -> bool:
     """Checks if a message is thread"""
@@ -69,12 +76,12 @@ async def create_mdo_thread(message: discord.Message) -> None:
 
 @bot.event
 async def on_ready():
-    print('Ready!')
+    logger.info("Logged into discord as {}".format(f"{bot.user.name}#{bot.user.discriminator}"))
 
 
 @bot.event
 async def on_message(message: discord.Message) -> None: # Message was sent
-    print('Processing message')
+    logger.info("Processing message")
 
     if message.author == bot.user: # The bot caught his own message
         return
