@@ -70,7 +70,14 @@ async def create_mdo_thread(message: discord.Message) -> None:
 
 
 @bot.event
+async def on_ready():
+    print('Ready!')
+
+
+@bot.event
 async def on_message(message: discord.Message) -> None: # Message was sent
+    print('Processing message')
+
     if message.author == bot.user: # The bot caught his own message
         return
 
