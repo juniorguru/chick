@@ -10,7 +10,7 @@ from juniorguru_chick.bot import bot
 
 HOST = os.getenv('HOST', '0.0.0.0')
 
-PORT = int(os.getenv('PORT', 8080))
+PORT = int(os.getenv('PORT', '8080'))
 
 DISCORD_API_KEY = os.getenv('DISCORD_API_KEY')
 

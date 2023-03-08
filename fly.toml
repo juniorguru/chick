@@ -1,11 +1,10 @@
-# fly.toml file generated for juniorguru-chick on 2023-03-08T10:58:11+01:00
-
 app = "juniorguru-chick"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
 [env]
+  PORT = "8080"
 
 [experimental]
   auto_rollback = true
@@ -16,6 +15,7 @@ processes = []
   processes = ["app"]
   protocol = "tcp"
   script_checks = []
+
   [services.concurrency]
     hard_limit = 25
     soft_limit = 20
