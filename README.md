@@ -14,7 +14,10 @@ _Please, update the above list if adding features._
 
 ## Installation
 
-... TODO
+1. You'll need [poetry](https://python-poetry.org/) installed.
+2. Clone this repository: `git clone git@github.com:juniorguru/juniorguru-chick.git`
+3. Go to the project directory: `cd juniorguru-chick`
+4. Install the project: `poetry install`
 
 ## Deployment
 
