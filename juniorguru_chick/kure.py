@@ -1,19 +1,23 @@
-import discord
-from discord.ext import commands
+import os
 from datetime import datetime
 
-#! API KEY, read from file "API_KEY" in the same directory as this .py file
-with open("API_KEY", "r") as file:
-    API_KEY = file.readline().strip()
+import discord
+from discord.ext import commands
 
-bot = commands.Bot()
 
 DAYS = ["Pondělní", "Úterní", "Středeční",
         "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
+DISCORD_API_TOKEN = os.environ['DISCORD_API_TOKEN']
+
+
+bot = commands.Bot()
+
+
 # Checks if a message is thread
 def is_thread(message: discord.Message) -> bool:
     return message.type == discord.MessageType.thread_created
+
 
 # Creates a thread for a message in #ahoj, ahoj_thread_handler will catch the creation
 async def create_ahoj_thread(message: discord.Message) -> None:
@@ -27,6 +31,7 @@ async def create_ahoj_thread(message: discord.Message) -> None:
 
     await message.create_thread(name=thread_name)
 
+
 # Called when a thread is created in #ahoj. Kuře-made threads included
 async def ahoj_thread_handler(thread: discord.Thread) -> None:
     message = thread.starting_message
@@ -39,6 +44,7 @@ async def ahoj_thread_handler(thread: discord.Thread) -> None:
     # The thread message has to be sent last, or the API will process it before the actual users message. The reactions above work as a delay
     await thread.send("Nazdar {}, vítej v klubu!".format(member_name))
 
+
 # Creates a thread for a message in #past-vedle-pasti
 async def create_pvp_thread(message: discord.Message) -> None:
     if is_thread(message):
@@ -49,6 +55,7 @@ async def create_pvp_thread(message: discord.Message) -> None:
     await message.create_thread(name="{} past na {}".format(DAYS[weekday], message.author.name))
     await message.add_reaction("🐣")
 
+
 # Creates a thread for a message in #múj-dnešní-objev
 async def create_mdo_thread(message: discord.Message) -> None:
     if is_thread(message):
@@ -58,6 +65,7 @@ async def create_mdo_thread(message: discord.Message) -> None:
 
     await message.create_thread(name="{} objev od {}".format(DAYS[weekday], message.author.name))
     await message.add_reaction("🐣")
+
 
 @bot.event
 async def on_message(message: discord.Message) -> None: # Message was sent
@@ -83,4 +91,5 @@ async def on_thread_create(thread: discord.Thread) -> None:
     if channel_name == "ahoj":
         await ahoj_thread_handler(thread)
 
-bot.run(API_KEY)
+
+bot.run(DISCORD_API_TOKEN)
