@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "juniorguru-chick"
+version = "0.0.0"
+description = "A real-time, synchronous junior.guru Discord bot"
+authors = ["Honza Javorek <mail@honzajavorek.cz>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://junior.guru/club/"
+repository = "https://github.com/juniorguru/juniorguru-chick/"
+packages = [{include = "juniorguru_chick"}]
+
+[tool.poetry.dependencies]
+python = "3.10.*"
+py-cord = "2.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
