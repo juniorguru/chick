@@ -9,17 +9,12 @@ from discord.ext import commands
 DAYS = ["Pondělní", "Úterní", "Středeční",
         "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
-DISCORD_API_KEY = os.getenv('DISCORD_API_KEY')
+
+logger = logging.getLogger("chick.bot")
 
 
 bot = commands.Bot()
 
-logging.basicConfig()
-
-logger = logging.getLogger("chick")
-logger.setLevel(logging.INFO)
-
-logger.info("Start")
 
 def is_thread(message: discord.Message) -> bool:
     """Checks if a message is thread"""
@@ -76,7 +71,7 @@ async def create_mdo_thread(message: discord.Message) -> None:
 
 @bot.event
 async def on_ready():
-    logger.info("Logged into discord as {}".format(f"{bot.user.name}#{bot.user.discriminator}"))
+    logger.info("Logged into Discord as {}".format(f"{bot.user.name}#{bot.user.discriminator}"))
 
 
 @bot.event
@@ -107,7 +102,3 @@ async def on_message(message: discord.Message) -> None: # Message was sent
 #     channel_name = thread.starting_message.channel.name
 #     if channel_name == "ahoj":
 #         await ahoj_thread_handler(thread)
-
-
-def main():
-    bot.run(DISCORD_API_KEY)
