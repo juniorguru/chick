@@ -20,7 +20,7 @@ logger = logging.getLogger("chick")
 logger.setLevel(logging.INFO)
 
 
-async def run():
+async def run() -> None:
     # inspired by https://stackoverflow.com/a/54462411/325365
     logger.info(f'Starting the web app at {HOST}:{PORT}')
     runner = AppRunner(web)
@@ -38,7 +38,7 @@ async def run():
         await runner.cleanup()
 
 
-def main():
+def main() -> None:
     logger.info('Starting')
     loop = asyncio.get_event_loop()
     try:
