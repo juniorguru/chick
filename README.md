@@ -6,9 +6,10 @@ A real-time, synchronous junior.guru Discord bot.
 
 All junior.guru automation happens asynchronously (with up-to-24h delay), except of the following tasks provided by this bot:
 
--   Creating threads for #ahoj
--   Creating threads for #past-vedle-pasti
--   Creating threads for #můj-dnešní-objev
+- [x] Creating threads in #past-vedle-pasti
+- [x] Creating threads in #můj-dnešní-objev
+- [ ] Creating threads and greetings in #ahoj
+- [ ] Pins
 
 _Please, update the above list if adding features._
 
