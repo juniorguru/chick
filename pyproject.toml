@@ -14,7 +14,7 @@ jgc = "juniorguru_chick.main:main"
 
 [tool.poetry.dependencies]
 python = "3.11.*"
-py-cord = "2.4.0"
+py-cord = "2.4.1"
 aiohttp = "3.8.4"
 
 [build-system]
