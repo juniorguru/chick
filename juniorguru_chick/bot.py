@@ -77,13 +77,16 @@ async def on_ready():
 async def on_message(message: discord.Message) -> None: # Message was sent
     logger.info("Processing message")
 
-    if message.author == bot.user: # The bot caught his own message
+    if message.author == bot.user:
+        logger.info("Message sent by the bot itself, skipping")
         return
 
-    if message.guild is None: # DMs
+    if message.guild is None:
+        logger.info("Message sent to DMs, skipping")
         return
 
     channel_name = message.channel.name
+    logger.info(f"Message sent to {channel_name!r}")
 
     # TODO let's start with less important channels first
     # if channel_name == "ahoj":
