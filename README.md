@@ -8,6 +8,8 @@ All junior.guru automation happens asynchronously (with up-to-24h delay), except
 
 - [x] Creating threads in #past-vedle-pasti
 - [x] Creating threads in #můj-dnešní-objev
+- [x] Reacting to member-made threads in #práce-inzeráty
+- [x] Reacting to member-made threads in #práce-hledám
 - [ ] Creating threads and greetings in #ahoj
 - [ ] Pins
 

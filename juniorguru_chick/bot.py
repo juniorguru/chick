@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 import logging
 
@@ -81,7 +80,7 @@ async def on_message(message: discord.Message) -> None: # Message was sent
     if message.author == bot.user: # The bot caught his own message
         return
 
-    if message.guild is None: # DMs block
+    if message.guild is None: # DMs
         return
 
     channel_name = message.channel.name
@@ -94,6 +93,10 @@ async def on_message(message: discord.Message) -> None: # Message was sent
         await create_pvp_thread(message)
     elif channel_name == "můj-dnešní-objev":
         await create_mdo_thread(message)
+    elif channel_name == "práce-inzeráty":
+        await message.add_reaction("<:dk:842727526736068609>")
+    elif channel_name == "práce-hledám":
+        await message.add_reaction("👍")
 
 
 # TODO let's start with less important channels first
