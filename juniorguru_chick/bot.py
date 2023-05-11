@@ -1,8 +1,10 @@
+import asyncio
 from datetime import datetime
 import logging
 
 import discord
 from discord.ext import commands
+from pkg_resources import add_activation_listener
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční",
@@ -16,56 +18,23 @@ bot = commands.Bot()
 
 
 def is_thread(message: discord.Message) -> bool:
-    """Checks if a message is thread"""
+    """Checks if given message is a system 'thread created' announcement"""
     return message.type == discord.MessageType.thread_created
 
 
-# TODO let's start with less important channels first
-# async def create_ahoj_thread(message: discord.Message) -> None:
-#     """Creates a thread for a message in #ahoj, ahoj_thread_handler will catch the creation"""
-#     thread_name = "Ahoj {}!".format(message.author.display_name)
-#
-#     if is_thread(message):
-#         return
-#
-#     if message.is_system():
-#         return
-#
-#     await message.create_thread(name=thread_name)
-
-
-# TODO let's start with less important channels first
-# async def ahoj_thread_handler(thread: discord.Thread) -> None:
-#     """Called when a thread is created in #ahoj. Kuře-made threads included"""
-#     message = thread.starting_message
-#     member_name = message.author.display_name
-#     thread_name = "Ahoj {}!".format(member_name)
-#
-#     await thread.edit(name=thread_name)
-#     await message.add_reaction("👋")
-#     await message.add_reaction("🐣")
-#     # The thread message has to be sent last, or the API will process it before the actual users message. The reactions above work as a delay
-#     await thread.send("Nazdar {}, vítej v klubu!".format(member_name))
-
-
-async def create_pvp_thread(message: discord.Message) -> None:
-    """Creates a thread for a message in #past-vedle-pasti"""
-    if is_thread(message):
-        return
-
+async def create_thread(message: discord.Message, name_template) -> None:
+    """Creates a new thread for given message"""
     weekday = datetime.now().weekday()
+    name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
+    await message.create_thread(name=name)
 
-    await message.create_thread(name="{} past na {}".format(DAYS[weekday], message.author.display_name))
 
-
-async def create_mdo_thread(message: discord.Message) -> None:
-    """Creates a thread for a message in #můj-dnešní-objev"""
-    if is_thread(message):
-        return
-
+async def ensure_thread_name(thread: discord.Thread, name_template) -> None:
+    """Ensures given thread has a name"""
     weekday = datetime.now().weekday()
-
-    await message.create_thread(name="{} objev od {}".format(DAYS[weekday], message.author.display_name))
+    name = name_template.format(weekday=DAYS[weekday], author=thread.starting_message.author.display_name)
+    if thread.name != name:
+        await thread.edit(name=name)
 
 
 @bot.event
@@ -85,17 +54,19 @@ async def on_message(message: discord.Message) -> None: # Message was sent
         logger.info("Message sent to DMs, skipping")
         return
 
+    if is_thread(message) or message.is_system():
+        logger.info("System message, skipping")
+        return
+
     channel_name = message.channel.name
     logger.info(f"Message sent to {channel_name!r}")
 
-    # TODO let's start with less important channels first
-    # if channel_name == "ahoj":
-    #     await create_ahoj_thread(message)
-    # elif
-    if channel_name == "past-vedle-pasti":
-        await create_pvp_thread(message)
+    if channel_name == "ahoj":
+        await create_thread(message, "Ahoj {author}!")
+    elif channel_name == "past-vedle-pasti":
+        await create_thread(message, "{weekday} past na {author}")
     elif channel_name == "můj-dnešní-objev":
-        await create_mdo_thread(message)
+        await create_thread(message, "{weekday} objev od {author}")
 
 
 @bot.event
@@ -108,10 +79,12 @@ async def on_thread_create(thread: discord.Thread) -> None:
         logger.info("Thread has no starting message, skipping")
         return
 
-    # TODO let's start with less important channels first
-    # if channel_name == "ahoj":
-    #     await ahoj_thread_handler(thread)
-    if channel_name == "práce-inzeráty":
+    if channel_name == "ahoj":
+        await asyncio.gather(ensure_thread_name(thread, "Ahoj {author}!"),
+                             starting_message.add_reaction("👋"),
+                             starting_message.add_reaction("🐣"),
+                             starting_message.add_reaction("👍"))
+    elif channel_name == "práce-inzeráty":
         await starting_message.add_reaction("<:dk:842727526736068609>")
     elif channel_name == "práce-hledám":
         await starting_message.add_reaction("👍")
