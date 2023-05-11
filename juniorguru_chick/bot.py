@@ -96,15 +96,22 @@ async def on_message(message: discord.Message) -> None: # Message was sent
         await create_pvp_thread(message)
     elif channel_name == "můj-dnešní-objev":
         await create_mdo_thread(message)
-    elif channel_name == "práce-inzeráty":
-        await message.add_reaction("<:dk:842727526736068609>")
+
+
+@bot.event
+async def on_thread_create(thread: discord.Thread) -> None:
+    channel_name = thread.parent.name
+    logger.info(f"Thread created in {channel_name!r}")
+
+    starting_message = thread.starting_message
+    if not starting_message:
+        logger.info("Thread has no starting message, skipping")
+        return
+
+    # TODO let's start with less important channels first
+    # if channel_name == "ahoj":
+    #     await ahoj_thread_handler(thread)
+    if channel_name == "práce-inzeráty":
+        await starting_message.add_reaction("<:dk:842727526736068609>")
     elif channel_name == "práce-hledám":
-        await message.add_reaction("👍")
-
-
-# TODO let's start with less important channels first
-# @bot.event
-# async def on_thread_create(thread: discord.Thread) -> None:
-#     channel_name = thread.starting_message.channel.name
-#     if channel_name == "ahoj":
-#         await ahoj_thread_handler(thread)
+        await starting_message.add_reaction("👍")
