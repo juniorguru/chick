@@ -9,13 +9,18 @@ from discord.ext import commands
 DAYS = ["Pondělní", "Úterní", "Středeční",
         "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
+CLUB_GUILD_ID = 769966886598737931
+
 WELCOME_ROLE_ID = 1062755787153358879
 
 
 logger = logging.getLogger("chick.bot")
 
 
-bot = commands.Bot()
+bot = commands.Bot(intents=discord.Intents(guilds=True,
+                                           members=True,
+                                           messages=True,
+                                           message_content=True))
 
 
 @bot.event
@@ -25,17 +30,18 @@ async def on_ready():
 
 
 @bot.event
-async def on_message(message: discord.Message) -> None: # Message was sent
-    logger.info("Processing message")
+async def on_message(message: discord.Message) -> None:
+    if message.guild and message.guild.id != CLUB_GUILD_ID:
+        logger.error(f"Not a club message! Guild ID: #{message.guild.id}")
+        return
 
+    logger.info("Processing message")
     if message.author == bot.user:
         logger.info("Message sent by the bot itself, skipping")
         return
-
     if message.guild is None:
         logger.info("Message sent to DMs, skipping")
         return
-
     if is_thread(message) or message.is_system():
         logger.info("System message, skipping")
         return
@@ -53,6 +59,10 @@ async def on_message(message: discord.Message) -> None: # Message was sent
 
 @bot.event
 async def on_thread_create(thread: discord.Thread) -> None:
+    if thread.guild.id != CLUB_GUILD_ID:
+        logger.error(f"Not a club thread! Guild ID: #{thread.guild.id}")
+        return
+
     if not thread.parent:
         logger.warning(f"Thread {thread.name} has no parent, skipping")
         return
