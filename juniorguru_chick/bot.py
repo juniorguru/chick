@@ -1,3 +1,4 @@
+from dis import disco
 import os
 import asyncio
 from datetime import datetime
@@ -13,6 +14,8 @@ DAYS = ["Pondělní", "Úterní", "Středeční",
 GUILD_ID = int(os.getenv('GUILD_ID', '769966886598737931'))
 
 GREETER_ROLE_ID = 1062755787153358879
+
+INTRO_THREAD_NAME_TEMPLATE = "Ahoj {author}!"
 
 
 logger = logging.getLogger("chick.bot")
@@ -51,7 +54,7 @@ async def on_message(message: discord.Message) -> None:
     logger.info(f"Message sent to {channel_name!r}")
 
     if channel_name == "ahoj":
-        await create_thread(message, "Ahoj {author}!")
+        await create_thread(message, INTRO_THREAD_NAME_TEMPLATE)
     elif channel_name == "past-vedle-pasti":
         await create_thread(message, "{weekday} past na {author}")
     elif channel_name == "můj-dnešní-objev":
@@ -78,13 +81,16 @@ async def on_thread_create(thread: discord.Thread) -> None:
 
     if channel_name == "ahoj":
         emojis = choose_intro_emojis(starting_message.content)
-        logger.info(f"Reacting to {thread.name!r} with {emojis!r}")
-        await asyncio.gather(ensure_thread_name(thread, "Ahoj {author}!"),
-                             add_members_with_role(thread, GREETER_ROLE_ID),
-                             *[starting_message.add_reaction(emoji) for emoji in emojis])
+        logger.info(f"Processing thread {thread.name!r} (reacting with {emojis!r} and more…)")
+        tasks = [ensure_thread_name(thread, INTRO_THREAD_NAME_TEMPLATE),
+                 add_members_with_role(thread, GREETER_ROLE_ID)]
+        tasks.extend([starting_message.add_reaction(emoji) for emoji in emojis])
+        await asyncio.gather(*tasks)
     elif channel_name == "práce-inzeráty":
+        logger.info(f"Processing thread {thread.name!r} (reacting with ĎK)")
         await starting_message.add_reaction("<:dk:842727526736068609>")
     elif channel_name == "práce-hledám":
+        logger.info(f"Processing thread {thread.name!r} (reacting with 👍)")
         await starting_message.add_reaction("👍")
 
 
@@ -105,11 +111,11 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
         return None
 
 
-async def create_thread(message: discord.Message, name_template) -> None:
+async def create_thread(message: discord.Message, name_template) -> discord.Thread:
     """Creates a new thread for given message"""
     weekday = datetime.now().weekday()
     name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
-    await message.create_thread(name=name)
+    return await message.create_thread(name=name)
 
 
 async def ensure_thread_name(thread: discord.Thread, name_template) -> str | None:
