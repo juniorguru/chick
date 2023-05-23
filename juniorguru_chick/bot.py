@@ -1,3 +1,4 @@
+import os
 import asyncio
 from datetime import datetime
 import logging
@@ -9,7 +10,7 @@ from discord.ext import commands
 DAYS = ["Pondělní", "Úterní", "Středeční",
         "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
-CLUB_GUILD_ID = 769966886598737931
+GUILD_ID = int(os.getenv('GUILD_ID', '769966886598737931'))
 
 WELCOME_ROLE_ID = 1062755787153358879
 
@@ -31,8 +32,8 @@ async def on_ready():
 
 @bot.event
 async def on_message(message: discord.Message) -> None:
-    if message.guild and message.guild.id != CLUB_GUILD_ID:
-        logger.error(f"Not a club message! Guild ID: #{message.guild.id}")
+    if message.guild and message.guild.id != GUILD_ID:
+        logger.error(f"Message not in an allowed guild! #{message.guild.id}")
         return
 
     logger.info("Processing message")
@@ -59,8 +60,8 @@ async def on_message(message: discord.Message) -> None:
 
 @bot.event
 async def on_thread_create(thread: discord.Thread) -> None:
-    if thread.guild.id != CLUB_GUILD_ID:
-        logger.error(f"Not a club thread! Guild ID: #{thread.guild.id}")
+    if thread.guild.id != GUILD_ID:
+        logger.error(f"Thread not in an allowed guild! Guild ID: #{thread.guild.id}")
         return
 
     if not thread.parent:

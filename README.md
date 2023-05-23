@@ -42,6 +42,9 @@ The original, asynchronous bot installs and uses this codebase to run the same c
 -   Run `poetry run jgc` to start the bot.
 -   Press <kbd>Ctrl+C</kbd> to stop the bot.
 
+By default, the bot responds only in the club Discord guild.
+If you need to test it in a different guild, set the environment variable `GUILD_ID` to the ID of the guild.
+
 ## Deployment
 
 The bot is deployed to [fly.io](https://fly.io/).
