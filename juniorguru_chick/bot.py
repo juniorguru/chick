@@ -43,7 +43,7 @@ async def on_message(message: discord.Message) -> None:
     if message.guild is None:
         logger.info("Message sent to DMs, skipping")
         return
-    if is_thread(message) or message.is_system():
+    if is_thread_created(message) or message.is_system():
         logger.info("System message, skipping")
         return
 
@@ -88,7 +88,7 @@ async def on_thread_create(thread: discord.Thread) -> None:
         await starting_message.add_reaction("👍")
 
 
-def is_thread(message: discord.Message) -> bool:
+def is_thread_created(message: discord.Message) -> bool:
     """Checks if given message is a system 'thread created' announcement"""
     return message.type == discord.MessageType.thread_created
 
