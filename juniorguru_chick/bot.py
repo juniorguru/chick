@@ -9,6 +9,8 @@ from discord.ext import commands
 DAYS = ["Pondělní", "Úterní", "Středeční",
         "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
+WELCOME_ROLE_ID = 1062755787153358879
+
 
 logger = logging.getLogger("chick.bot")
 
@@ -65,6 +67,7 @@ async def on_thread_create(thread: discord.Thread) -> None:
 
     if channel_name == "ahoj":
         await asyncio.gather(ensure_thread_name(thread, "Ahoj {author}!"),
+                             add_members_with_role(thread, WELCOME_ROLE_ID),
                              starting_message.add_reaction("👋"),
                              starting_message.add_reaction("🐣"),
                              starting_message.add_reaction("👍"))
@@ -109,3 +112,8 @@ async def ensure_thread_name(thread: discord.Thread, name_template) -> str | Non
         return name
     else:
         return None
+
+
+async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
+    """Adds members of given role to given thread"""
+    await thread.send(f"<@&{role_id}>", delete_after=0, silent=True)
