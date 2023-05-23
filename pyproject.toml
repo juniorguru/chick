@@ -17,6 +17,14 @@ python = "3.11.*"
 py-cord = {version = "2.4.1", extras = ["speed"]}
 aiohttp = "3.8.4"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "7.3.1"
+
+[tool.pytest.ini_options]
+python_files = "test_*.py *_test.py test.py"
+testpaths = "."
+addopts = "--ff"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
