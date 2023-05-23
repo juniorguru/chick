@@ -12,7 +12,7 @@ DAYS = ["Pondělní", "Úterní", "Středeční",
 
 GUILD_ID = int(os.getenv('GUILD_ID', '769966886598737931'))
 
-WELCOME_ROLE_ID = 1062755787153358879
+INTRO_ROLE_ID = 1062755787153358879
 
 
 logger = logging.getLogger("chick.bot")
@@ -78,7 +78,7 @@ async def on_thread_create(thread: discord.Thread) -> None:
 
     if channel_name == "ahoj":
         await asyncio.gather(ensure_thread_name(thread, "Ahoj {author}!"),
-                             add_members_with_role(thread, WELCOME_ROLE_ID),
+                             add_members_with_role(thread, INTRO_ROLE_ID),
                              starting_message.add_reaction("👋"),
                              starting_message.add_reaction("🐣"),
                              starting_message.add_reaction("👍"))
