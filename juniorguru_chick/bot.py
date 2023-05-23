@@ -19,7 +19,7 @@ bot = commands.Bot()
 @bot.event
 async def on_ready():
     if bot.user:
-        logger.info("Logged into Discord as {}".format(f"{bot.user.name}#{bot.user.discriminator}"))
+        logger.info(f"Logged into Discord as {bot.user.name}#{bot.user.discriminator}")
 
 
 @bot.event
