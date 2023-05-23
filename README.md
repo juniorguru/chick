@@ -10,8 +10,9 @@ All junior.guru automation happens asynchronously (with up-to-24h delay), except
 - [x] Creating threads in #můj-dnešní-objev
 - [x] Reacting to member-made threads in #práce-inzeráty
 - [x] Reacting to member-made threads in #práce-hledám
-- [ ] Creating threads and greetings in #ahoj
-- [ ] Pins
+- [x] Creating threads in #ahoj
+- [ ] Greeting new members in #ahoj [#11](https://github.com/juniorguru/juniorguru-chick/issues/11)
+- [ ] Saving pins to members' DMs [#13](https://github.com/juniorguru/juniorguru-chick/issues/13)
 
 _Please, update the above list if adding features._
 
