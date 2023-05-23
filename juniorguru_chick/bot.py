@@ -4,7 +4,6 @@ import logging
 
 import discord
 from discord.ext import commands
-from pkg_resources import add_activation_listener
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční",
@@ -39,7 +38,8 @@ async def ensure_thread_name(thread: discord.Thread, name_template) -> None:
 
 @bot.event
 async def on_ready():
-    logger.info("Logged into Discord as {}".format(f"{bot.user.name}#{bot.user.discriminator}"))
+    if bot.user:
+        logger.info("Logged into Discord as {}".format(f"{bot.user.name}#{bot.user.discriminator}"))
 
 
 @bot.event
@@ -58,7 +58,7 @@ async def on_message(message: discord.Message) -> None: # Message was sent
         logger.info("System message, skipping")
         return
 
-    channel_name = message.channel.name
+    channel_name = message.channel.name  # type: ignore
     logger.info(f"Message sent to {channel_name!r}")
 
     if channel_name == "ahoj":
@@ -71,6 +71,10 @@ async def on_message(message: discord.Message) -> None: # Message was sent
 
 @bot.event
 async def on_thread_create(thread: discord.Thread) -> None:
+    if not thread.parent:
+        logger.warning(f"Thread {thread.name} has no parent, skipping")
+        return
+
     channel_name = thread.parent.name
     logger.info(f"Thread created in {channel_name!r}")
 
