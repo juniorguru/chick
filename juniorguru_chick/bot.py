@@ -65,7 +65,7 @@ async def on_thread_create(thread: discord.Thread) -> None:
         return
 
     if not thread.parent:
-        logger.warning(f"Thread {thread.name} has no parent, skipping")
+        logger.warning(f"Thread {thread.name!r} has no parent, skipping")
         return
 
     channel_name = thread.parent.name
@@ -73,15 +73,15 @@ async def on_thread_create(thread: discord.Thread) -> None:
 
     starting_message = await fetch_starting_message(thread)
     if not starting_message:
-        logger.warning(f"Thread {thread.name} has no starting message, skipping")
+        logger.warning(f"Thread {thread.name!r} has no starting message, skipping")
         return
 
     if channel_name == "ahoj":
+        emojis = choose_intro_emojis(starting_message.content)
+        logger.info(f"Reacting to {thread.name!r} with {emojis!r}")
         await asyncio.gather(ensure_thread_name(thread, "Ahoj {author}!"),
                              add_members_with_role(thread, GREETER_ROLE_ID),
-                             starting_message.add_reaction("👋"),
-                             starting_message.add_reaction("🐣"),
-                             starting_message.add_reaction("👍"))
+                             *[starting_message.add_reaction(emoji) for emoji in emojis])
     elif channel_name == "práce-inzeráty":
         await starting_message.add_reaction("<:dk:842727526736068609>")
     elif channel_name == "práce-hledám":
@@ -128,3 +128,9 @@ async def ensure_thread_name(thread: discord.Thread, name_template) -> str | Non
 async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
     """Adds members of given role to given thread"""
     await thread.send(f"<@&{role_id}>", delete_after=0, silent=True)
+
+
+def choose_intro_emojis(message_content: str) -> list[str]:
+    """Returns a list of emoji reactions suitable for given message"""
+    # TODO https://github.com/juniorguru/juniorguru-chick/issues/14
+    return ["👋", "🐣", "👍"]
