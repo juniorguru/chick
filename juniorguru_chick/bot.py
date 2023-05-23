@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime
 import logging
-from tracemalloc import start
 
 import discord
 from discord.ext import commands
