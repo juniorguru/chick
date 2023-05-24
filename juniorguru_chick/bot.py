@@ -6,14 +6,7 @@ import discord
 from discord.ext import commands
 
 from juniorguru_chick.lib.intro_emojis import choose_intro_emojis
-from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, create_thread, ensure_thread_name, add_members_with_role
-
-
-GUILD_ID = int(os.getenv('GUILD_ID', '769966886598737931'))
-
-GREETER_ROLE_ID = 1062755787153358879
-
-INTRO_THREAD_NAME_TEMPLATE = "Ahoj {author}!"
+from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, create_thread, ensure_thread_name, add_members_with_role, INTRO_THREAD_NAME_TEMPLATE, GREETER_ROLE_ID
 
 
 logger = logging.getLogger("chick.bot")
@@ -26,17 +19,13 @@ bot = commands.Bot(intents=discord.Intents(guilds=True,
 
 
 @bot.event
-async def on_ready():
-    if bot.user:
-        logger.info(f"Logged into Discord as {bot.user.name}#{bot.user.discriminator}")
+async def on_ready() -> None:
+    for guild in bot.guilds:
+        logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
 
 
 @bot.event
 async def on_message(message: discord.Message) -> None:
-    if message.guild and message.guild.id != GUILD_ID:
-        logger.error(f"Message not in an allowed guild! #{message.guild.id}")
-        return
-
     logger.info("Processing message")
     if message.author == bot.user:
         logger.info("Message sent by the bot itself, skipping")
@@ -61,10 +50,6 @@ async def on_message(message: discord.Message) -> None:
 
 @bot.event
 async def on_thread_create(thread: discord.Thread) -> None:
-    if thread.guild.id != GUILD_ID:
-        logger.error(f"Thread not in an allowed guild! Guild ID: #{thread.guild.id}")
-        return
-
     if not thread.parent:
         logger.warning(f"Thread {thread.name!r} has no parent, skipping")
         return
