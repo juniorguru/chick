@@ -6,6 +6,10 @@ import discord
 DAYS = ["Pondělní", "Úterní", "Středeční",
         "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
+GREETER_ROLE_ID = 1062755787153358879
+
+INTRO_THREAD_NAME_TEMPLATE = "Ahoj, já jsem {author}!"
+
 
 def is_thread_created(message: discord.Message) -> bool:
     """Checks if given message is a system 'thread created' announcement"""
