@@ -1,9 +1,13 @@
 import re
+from textwrap import dedent
+from typing import Any
+
+from discord import ui, ButtonStyle, Embed
 
 
 GREETER_ROLE_ID = 1062755787153358879
 
-THREAD_NAME_TEMPLATE = "Ahoj, já jsem {author}!"
+THREAD_NAME_TEMPLATE = "Ahoj {author}!"
 
 PATTERNS_EMOJIS_MAPPING = {
     re.compile(r'\bpython\w*\b', re.I): ['<:python:842331892091322389>'],
@@ -45,10 +49,50 @@ PATTERNS_EMOJIS_MAPPING = {
 }
 
 
-def choose_intro_emojis(message_content: str) -> list[str]:
+def choose_intro_emojis(intro_message_content: str) -> list[str]:
     """Returns a list of emoji reactions suitable for given message"""
     emojis = set()
     for pattern_re, pattern_emojis in PATTERNS_EMOJIS_MAPPING.items():
-        if pattern_re.search(message_content):
+        if pattern_re.search(intro_message_content):
             emojis.update(pattern_emojis)
     return ["👋", "🐣", "👍"] + list(emojis)
+
+
+def greet() -> dict[str, Any]:
+    content = (
+        'Píp, píp! Tady kuře, místní robot. '
+        'Vítej v klubu 👋'
+        '\n\n'
+        'Dík, že se představuješ. '
+        'Když o tobě víme víc, můžeme ti líp radit <:meowthumbsup:842730599906279494> '
+        '\n\n'
+        # TODO https://github.com/juniorguru/juniorguru-chick/issues/12
+        '- Nevíš co dál? Popiš svou situaci do <#788826407412170752>\n'
+        '- Vybíráš kurz? Založ vlákno v <#1075052469303906335>\n'
+        '- Hledáš konkrétní recenze? Zkus vyhledávání\n'
+        '- Dotaz? Hurá do <#1067439203983568986>\n'
+        '- Záznamy přednášek? <#788822884948770846>\n'
+        '- Něco jiného? <#769966887055392768> snese cokoliv\n'
+        '- Nevíš, jak to tady funguje? Ptej se v <#806215364379148348>'
+        '\n\n'
+        'A nezapomeň, že junior.guru není jenom klub. '
+        'Tady aspoň dva odkazy, které fakt nechceš minout: '
+    )
+    view = ui.View(ui.Button(emoji='📖',
+                             label='Příručka',
+                             url='https://junior.guru/handbook/',
+                             style=ButtonStyle.secondary),
+                   ui.Button(emoji='🧑‍🏫',
+                             label='Kurzy',
+                             url='https://junior.guru/courses/',
+                             style=ButtonStyle.secondary))
+    return dict(content=content, view=view)
+
+
+def game() -> dict[str, Any]:
+    content = (
+        'Pokud chceš, můžeme si tady teď zahrát malou hru. '
+        'Napiš o sobě **tři krátké věty**. Dvě pravdy a jednu lež. '
+        'Ostatní můžou hádat, co z toho není pravda 😎 '
+    )
+    return dict(content=content)

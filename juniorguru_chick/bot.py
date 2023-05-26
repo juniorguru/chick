@@ -1,4 +1,3 @@
-import os
 import asyncio
 import logging
 
@@ -71,11 +70,17 @@ async def on_thread_create(thread: discord.Thread) -> None:
         await handle_candidate_thread(starting_message, thread, is_bot)
 
 
+async def add_intro_messages(thread: discord.Thread):
+    await thread.send(**intro.greet())
+    await thread.send(**intro.game())
+    await add_members_with_role(thread, intro.GREETER_ROLE_ID)
+
+
 async def handle_intro_thread(starting_message: discord.Message, thread: discord.Thread, is_bot: bool) -> None:
     emojis = intro.choose_intro_emojis(starting_message.content)
     logger.info(f"Processing thread {thread.name!r} (reacting with {emojis!r} and more…)")
     tasks = [ensure_thread_name(thread, intro.THREAD_NAME_TEMPLATE),
-             add_members_with_role(thread, intro.GREETER_ROLE_ID)]
+             add_intro_messages(thread)]
     tasks.extend([starting_message.add_reaction(emoji) for emoji in emojis])
     await asyncio.gather(*tasks)
 
