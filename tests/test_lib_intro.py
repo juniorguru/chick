@@ -1,4 +1,4 @@
-from juniorguru_chick.lib.intro_emojis import choose_intro_emojis
+from juniorguru_chick.lib.intro import choose_intro_emojis
 
 
 def test_choose_intro_emojis():

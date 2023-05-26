@@ -1,6 +1,10 @@
 import re
 
 
+GREETER_ROLE_ID = 1062755787153358879
+
+THREAD_NAME_TEMPLATE = "Ahoj, já jsem {author}!"
+
 PATTERNS_EMOJIS_MAPPING = {
     re.compile(r'\bpython\w*\b', re.I): ['<:python:842331892091322389>'],
     re.compile(r'\bsql\b', re.I): ['<:database:900833211809136641>'],

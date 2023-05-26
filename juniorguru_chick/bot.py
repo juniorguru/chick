@@ -5,8 +5,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from juniorguru_chick.lib.intro_emojis import choose_intro_emojis
-from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, create_thread, ensure_thread_name, add_members_with_role, INTRO_THREAD_NAME_TEMPLATE, GREETER_ROLE_ID
+from juniorguru_chick.lib import intro
+from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, create_thread, ensure_thread_name, add_members_with_role
 
 
 logger = logging.getLogger("chick.bot")
@@ -41,7 +41,7 @@ async def on_message(message: discord.Message) -> None:
     logger.info(f"Message sent to {channel_name!r}")
 
     if channel_name == "ahoj":
-        await create_thread(message, INTRO_THREAD_NAME_TEMPLATE)
+        await create_thread(message, intro.THREAD_NAME_TEMPLATE)
     elif channel_name == "past-vedle-pasti":
         await create_thread(message, "{weekday} past na {author}")
     elif channel_name == "můj-dnešní-objev":
@@ -72,10 +72,10 @@ async def on_thread_create(thread: discord.Thread) -> None:
 
 
 async def handle_intro_thread(starting_message: discord.Message, thread: discord.Thread, is_bot: bool) -> None:
-    emojis = choose_intro_emojis(starting_message.content)
+    emojis = intro.choose_intro_emojis(starting_message.content)
     logger.info(f"Processing thread {thread.name!r} (reacting with {emojis!r} and more…)")
-    tasks = [ensure_thread_name(thread, INTRO_THREAD_NAME_TEMPLATE),
-             add_members_with_role(thread, GREETER_ROLE_ID)]
+    tasks = [ensure_thread_name(thread, intro.THREAD_NAME_TEMPLATE),
+             add_members_with_role(thread, intro.GREETER_ROLE_ID)]
     tasks.extend([starting_message.add_reaction(emoji) for emoji in emojis])
     await asyncio.gather(*tasks)
 
