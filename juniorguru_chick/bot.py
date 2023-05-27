@@ -80,7 +80,7 @@ async def handle_intro_thread(starting_message: discord.Message, thread: discord
 
 
 async def manage_intro_thread(thread: discord.Thread):
-    for message_args in intro.generate_messages():
+    for message_args in intro.generate_welcome_messages():
         await thread.send(**message_args)
     await add_members_with_role(thread, intro.GREETER_ROLE_ID)
 

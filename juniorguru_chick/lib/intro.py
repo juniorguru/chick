@@ -1,8 +1,7 @@
 import re
-from textwrap import dedent
 from typing import Any
 
-from discord import ui, ButtonStyle, Embed
+from discord import ui, ButtonStyle, Message, MessageType
 
 
 GREETER_ROLE_ID = 1062755787153358879
@@ -98,6 +97,6 @@ def generate_game_message() -> dict[str, Any]:
     return dict(content=content)
 
 
-def generate_messages() -> list[dict[str, Any]]:
+def generate_welcome_messages() -> list[dict[str, Any]]:
     return [generate_greeting_message(),
             generate_game_message()]
