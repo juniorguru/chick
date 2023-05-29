@@ -4,6 +4,6 @@ ENV PORT 8080
 RUN mkdir /app
 WORKDIR /app
 COPY pyproject.toml poetry.lock /app/
-RUN poetry install --no-interaction --no-ansi --no-root --no-dev
+RUN poetry install --no-interaction --no-ansi --no-root --only-main
 COPY . /app
 CMD poetry run jgc
