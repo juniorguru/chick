@@ -26,7 +26,7 @@ async def on_ready() -> None:
 @bot.event
 async def on_message(message: discord.Message) -> None:
     logger.info("Processing message")
-    if message.author.id == bot.user.id:
+    if message.author.id == bot.user.id:  # type: ignore
         logger.info("Message sent by the bot itself, skipping")
         return
     if message.guild is None:
