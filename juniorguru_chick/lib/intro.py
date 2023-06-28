@@ -57,7 +57,7 @@ def choose_intro_emojis(intro_message_content: str) -> list[str]:
     return ["👋", "🐣", "👍"] + list(emojis)
 
 
-def generate_greeting_message() -> dict[str, Any]:
+def generate_intro_message() -> dict[str, Any]:
     content = (
         'Píp, píp! Tady kuře, místní robot. '
         'Vítej v klubu 👋'
@@ -86,17 +86,3 @@ def generate_greeting_message() -> dict[str, Any]:
                              url='https://junior.guru/courses/',
                              style=ButtonStyle.secondary))
     return dict(content=content, view=view)
-
-
-def generate_game_message() -> dict[str, Any]:
-    content = (
-        'Pokud chceš, můžeme si tady teď zahrát malou hru. '
-        'Napiš o sobě **tři krátké věty**. Dvě pravdy a jednu lež. '
-        'Ostatní můžou hádat, co z toho není pravda 😎 '
-    )
-    return dict(content=content)
-
-
-def generate_welcome_messages() -> list[dict[str, Any]]:
-    return [generate_greeting_message(),
-            generate_game_message()]
