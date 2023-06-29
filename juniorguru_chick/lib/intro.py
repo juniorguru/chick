@@ -62,10 +62,10 @@ def generate_intro_message() -> dict[str, Any]:
         'Píp, píp! Tady kuře, místní robot. '
         'Vítej v klubu 👋'
         '\n\n'
-        'Představení můžeš doplnit či změnit přes tři tečky a „Upravit zprávu“ 📝'
-        '\n\n'
-        'A dík, že se představuješ! '
+        'Dík, že se představuješ! '
         'Když o tobě víme víc, můžeme ti líp radit <:meowthumbsup:842730599906279494>'
+        '\n\n'
+        'Představení můžeš kdyžtak doplnit či změnit přes tři tečky a „Upravit zprávu“ 📝'
         '\n\n'
         # TODO https://github.com/juniorguru/juniorguru-chick/issues/12
         '- Nevíš co dál? Popiš svou situaci do <#788826407412170752>\n'
