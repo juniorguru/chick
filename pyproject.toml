@@ -15,7 +15,7 @@ jgc = "juniorguru_chick.main:main"
 [tool.poetry.dependencies]
 python = "3.11.*"
 py-cord = {version = "2.4.1", extras = ["speed"]}
-aiohttp = "3.8.4"
+aiohttp = "3.8.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.4.0"
