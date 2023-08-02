@@ -30,7 +30,14 @@ async def on_message(message: discord.Message) -> None:
         logger.info("Message sent by the bot itself, skipping")
         return
     if message.guild is None:
-        logger.info("Message sent to DMs, skipping")
+        try:
+            response = ("Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně."
+                        "Tvou zprávu si nikdo nepřečte. Pokud se chceš na něco zeptat, zkus kanál <#769966886598737931> "
+                        "nebo napiš do soukromé zprávy komukoliv z moderátorů. Rádi tě nasměrují.")
+            await message.reply(response)
+        except discord.errors.Forbidden:
+            pass
+        logger.info("Skipping responding, the user has private DM's disabled")
         return
     if is_thread_created(message) or message.is_system():
         logger.info("System message, skipping")
