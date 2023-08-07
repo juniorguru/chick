@@ -23,20 +23,21 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
     except discord.errors.NotFound:
         return None
 
+def name_thread(message: discord.Message, name_template) -> str | None:
+    weekday = datetime.now().weekday()
+    name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
+    return name
 
 async def create_thread(message: discord.Message, name_template) -> discord.Thread:
     """Creates a new thread for given message"""
-    weekday = datetime.now().weekday()
-    name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
+    name = name_thread(message, name_template)
     return await message.create_thread(name=name)
-
 
 async def ensure_thread_name(thread: discord.Thread, name_template) -> str | None:
     """Ensures given thread has a name"""
     starting_message = await fetch_starting_message(thread)
     if starting_message:
-        weekday = datetime.now().weekday()
-        name = name_template.format(weekday=DAYS[weekday], author=starting_message.author.display_name)
+        name = name_thread(starting_message, name_template)
         if thread.name != name:
             await thread.edit(name=name)
         return name
