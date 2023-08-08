@@ -31,8 +31,9 @@ async def on_message(message: discord.Message) -> None:
         return
     if message.guild is None:
         try:
-            response = ("Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně."
-                        "Tvou zprávu si nikdo nepřečte. Pokud se chceš na něco zeptat, zkus kanál <#769966886598737931> "
+            response = ("Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně. "
+                        "Tvou zprávu si nikdo nepřečte. Pokud se chceš na něco zeptat, zkus kanál "
+                        "https://discord.com/channels/769966886598737931/806215364379148348 "
                         "nebo napiš do soukromé zprávy komukoliv z moderátorů. Rádi tě nasměrují.")
             await message.reply(response)
         except discord.errors.Forbidden:
