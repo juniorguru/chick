@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import discord
+import re
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční",
@@ -24,9 +25,29 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
         return None
 
 def name_thread(message: discord.Message, name_template) -> str | None:
-    weekday = datetime.now().weekday()
-    name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
-    return name
+
+    brackets_regex = re.compile(r"""
+        ^\[     # starts with [
+        .*      # any number of any characters
+        [^\s]   # not a whitespace
+        [^\]]   # not a closing bracket
+        \]      # ends with ]
+        """, re.VERBOSE)
+
+    """If the message includes text in square brackets, use that as name for the thread. Otherwise, use the name template."""
+    if (match:= re.match(brackets_regex, message.content)) is not None:
+        content = match.group()[1:-1]
+        content = content.split(",")
+        processed_content = []
+        for word in content:
+            processed_content.append(word.lstrip().strip())
+        name = ", ".join(processed_content)
+        return name
+
+    else:
+        weekday = datetime.now().weekday()
+        name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
+        return name
 
 async def create_thread(message: discord.Message, name_template) -> discord.Thread:
     """Creates a new thread for given message"""
