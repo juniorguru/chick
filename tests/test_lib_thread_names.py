@@ -43,14 +43,15 @@ def test_no_text_in_brackets():
     assert name_thread(message, name_template) == expected_name
 
 @pytest.mark.parametrize('content, expected_name', [
-    pytest.param("[eslint, nextjs]", "eslint, nextjs", id="comma separated strings with spaces"),
-    pytest.param("[eslint,nextjs]", "eslint, nextjs", id="comma separated strings without spaces"),
-    pytest.param("[ Java ]", "Java", id="whitespaces around string"),
-    pytest.param("[:css: CSS]", ":css: CSS", id="starting emoji"),
-    pytest.param("[eslint,nextjs, :css: CSS, ruby]", "eslint, nextjs, :css: CSS, ruby", id="emoji in the middle"),
-    pytest.param("[ eslint ] Hello", "eslint", id="brackets at the beginning")])
+    pytest.param("[eslint, nextjs]", "Past na Jana: eslint, nextjs", id="comma separated strings with spaces"),
+    pytest.param("[eslint,nextjs]", "Past na Jana: eslint, nextjs", id="comma separated strings without spaces"),
+    pytest.param("[ Java ]", "Past na Jana: Java", id="whitespaces around string"),
+    pytest.param("[:css: CSS]", "Past na Jana: :css: CSS", id="starting emoji"),
+    pytest.param("[eslint,nextjs, :css: CSS, ruby]", "Past na Jana: eslint, nextjs, :css: CSS, ruby", id="emoji in the middle"),
+    pytest.param("[ eslint ] Hello", "Past na Jana: eslint", id="brackets at the beginning")])
 def test_parse_message_in_brackets(content, expected_name):
     message = Message("Jana", content)
     name_template = "{weekday} objev od {author}"
+    alternative_name_template = "Past na {author}: {name}"
 
-    assert name_thread(message, name_template) == expected_name
+    assert name_thread(message, name_template, alternative_name_template) == expected_name
