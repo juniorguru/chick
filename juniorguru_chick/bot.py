@@ -50,7 +50,7 @@ async def on_message(message: discord.Message) -> None:
     if channel_name == "ahoj":
         await create_thread(message, intro.THREAD_NAME_TEMPLATE)
     elif channel_name == "past-vedle-pasti":
-        await create_thread(message, "{weekday} past na {author}")
+        await create_thread(message, "{weekday} past na {author}", "Past na {author}: {name}")
     elif channel_name == "můj-dnešní-objev":
         await create_thread(message, "{weekday} objev od {author}", "Objev od {author}: {name}")
 
