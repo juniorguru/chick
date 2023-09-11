@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import discord
+import re
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční",
@@ -23,20 +24,43 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
     except discord.errors.NotFound:
         return None
 
+def name_thread(message: discord.Message, name_template) -> str | None:
+    """If the message includes text in square brackets, use that as name for the thread. Otherwise, use the name template."""
+    brackets_regex = re.compile(r"""
+        ^
+        \[     # starts with [
+            (?P<bracket_content>
+                .*      # any number of any characters
+                [^\s]   # not a whitespace
+                [^\]]   # not a closing bracket
+            )
+        \]     # ends with ]
+    """, re.VERBOSE)
+
+    if (match:= re.match(brackets_regex, message.content)) is not None:
+        content = match.group("bracket_content")
+        parts = content.split(",")
+        words = []
+        for part in parts:
+            words.append(part.strip())
+        name = ", ".join(words)
+        return name
+
+    else:
+        weekday = datetime.now().weekday()
+        name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
+        return name
 
 async def create_thread(message: discord.Message, name_template) -> discord.Thread:
     """Creates a new thread for given message"""
-    weekday = datetime.now().weekday()
-    name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
+    name = name_thread(message, name_template)
     return await message.create_thread(name=name)
-
 
 async def ensure_thread_name(thread: discord.Thread, name_template) -> str | None:
     """Ensures given thread has a name"""
     starting_message = await fetch_starting_message(thread)
     if starting_message:
-        weekday = datetime.now().weekday()
-        name = name_template.format(weekday=DAYS[weekday], author=starting_message.author.display_name)
+        name = name_thread(starting_message, name_template)
         if thread.name != name:
             await thread.edit(name=name)
         return name
