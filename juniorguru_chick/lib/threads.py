@@ -25,23 +25,25 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
         return None
 
 def name_thread(message: discord.Message, name_template) -> str | None:
-
-    brackets_regex = re.compile(r"""
-        ^\[     # starts with [
-        .*      # any number of any characters
-        [^\s]   # not a whitespace
-        [^\]]   # not a closing bracket
-        \]      # ends with ]
-        """, re.VERBOSE)
-
     """If the message includes text in square brackets, use that as name for the thread. Otherwise, use the name template."""
+    brackets_regex = re.compile(r"""
+        ^
+        \[     # starts with [
+            (?P<bracket_content>
+                .*      # any number of any characters
+                [^\s]   # not a whitespace
+                [^\]]   # not a closing bracket
+            )
+        \]     # ends with ]
+    """, re.VERBOSE)
+
     if (match:= re.match(brackets_regex, message.content)) is not None:
-        content = match.group()[1:-1]
-        content = content.split(",")
-        processed_content = []
-        for word in content:
-            processed_content.append(word.lstrip().strip())
-        name = ", ".join(processed_content)
+        content = match.group("bracket_content")
+        parts = content.split(",")
+        words = []
+        for part in parts:
+            words.append(part.strip())
+        name = ", ".join(words)
         return name
 
     else:
