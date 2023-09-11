@@ -52,7 +52,7 @@ async def on_message(message: discord.Message) -> None:
     elif channel_name == "past-vedle-pasti":
         await create_thread(message, "{weekday} past na {author}")
     elif channel_name == "můj-dnešní-objev":
-        await create_thread(message, "{weekday} objev od {author}")
+        await create_thread(message, "{weekday} objev od {author}", "Past na {author}: {name}")
 
 
 @bot.event
