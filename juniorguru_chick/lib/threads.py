@@ -24,8 +24,8 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
     except discord.errors.NotFound:
         return None
 
-def name_thread(message: discord.Message, name_template) -> str | None:
-    """If the message includes text in square brackets, use that as name for the thread. Otherwise, use the name template."""
+def name_thread(message: discord.Message, name_template, alternative_name_template=None) -> str | None:
+    """If the message includes text in square brackets, use that as name for the thread. Otherwise, use the provided name template."""
     brackets_regex = re.compile(r"""
         ^
         \[     # starts with [
@@ -43,7 +43,9 @@ def name_thread(message: discord.Message, name_template) -> str | None:
         words = []
         for part in parts:
             words.append(part.strip())
-        name = ", ".join(words)
+        name_from_brackets = ", ".join(words)
+
+        name = alternative_name_template.format(author=message.author.display_name, name=name_from_brackets)
         return name
 
     else:
