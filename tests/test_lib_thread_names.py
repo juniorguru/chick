@@ -21,7 +21,6 @@ def test_name_thread_no_brackets():
 
     assert name_thread(message, name_template) == expected_name
 
-# test if brackets are not closed and if there is no text in brackets
 @pytest.mark.parametrize('content', [
     pytest.param("[ Hello this is my thread", id="brackets not closed"),
     pytest.param("[] Hello this is my thread", id="no text in brackets"),
@@ -34,7 +33,6 @@ def test_brackets_used_incorrectly(content):
 
     assert name_thread(message, name_template) == expected_name
 
-# test if there is no text in brackets
 def test_no_text_in_brackets():
     content = "[] Hello this is my thread"
     weekday = datetime.now().weekday()
@@ -44,7 +42,6 @@ def test_no_text_in_brackets():
 
     assert name_thread(message, name_template) == expected_name
 
-# test if there is no text in brackets
 @pytest.mark.parametrize('content, expected_name', [
     pytest.param("[eslint, nextjs]", "eslint, nextjs", id="comma separated strings with spaces"),
     pytest.param("[eslint,nextjs]", "eslint, nextjs", id="comma separated strings without spaces"),
