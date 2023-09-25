@@ -53,10 +53,6 @@ def name_thread(message: discord.Message, name_template, alternative_name_templa
         name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
         return name
 
-async def create_thread(message: discord.Message, name_template) -> discord.Thread:
-    """Creates a new thread for given message"""
-    name = name_thread(message, name_template)
-    return await message.create_thread(name=name)
 
 async def ensure_thread_name(thread: discord.Thread, name_template) -> str | None:
     """Ensures given thread has a name"""
