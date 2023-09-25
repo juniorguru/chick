@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from juniorguru_chick.lib import intro
-from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, create_thread, ensure_thread_name, add_members_with_role
+from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, ensure_thread_name, add_members_with_role, name_thread
 
 
 logger = logging.getLogger("chick.bot")
@@ -48,11 +48,11 @@ async def on_message(message: discord.Message) -> None:
     logger.info(f"Message sent to {channel_name!r}")
 
     if channel_name == "ahoj":
-        await create_thread(message, intro.THREAD_NAME_TEMPLATE)
+        await message.create_thread(name=name_thread(message, intro.THREAD_NAME_TEMPLATE))
     elif channel_name == "past-vedle-pasti":
-        await create_thread(message, "{weekday} past na {author}", "Past na {author}: {name}")
+        await message.create_thread(name=name_thread(message, "{weekday} past na {author}", "Past na {author}: {name}"))
     elif channel_name == "můj-dnešní-objev":
-        await create_thread(message, "{weekday} objev od {author}", "Objev od {author}: {name}")
+        await message.create_thread(name=name_thread(message, "{weekday} objev od {author}", "Objev od {author}: {name}"))
 
 
 @bot.event
