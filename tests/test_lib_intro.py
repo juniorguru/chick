@@ -22,8 +22,8 @@ def test_choose_intro_emoji_edge_cases(message_content, expected_emoji):
 
 
 
-
-def test_generate_intro_message_with_gh_connection_suggestion():
+@pytest.mark.asyncio  # unfortunately ui.View() touches the event loop
+async def test_generate_intro_message_with_gh_connection_suggestion():
     message_content = """
         Mám takový obecný přehled o programování HTML, CSS,
         Bootstrap, Python, Matlab 🫣, SQL, okrajově JS.
