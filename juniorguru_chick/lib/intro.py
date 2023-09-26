@@ -57,7 +57,7 @@ def choose_intro_emojis(intro_message_content: str) -> list[str]:
     return ["👋", "🐣", "👍"] + list(emojis)
 
 
-def generate_intro_message() -> dict[str, Any]:
+def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
     content = (
         'Píp, píp! Tady kuře, místní robot. '
         'Vítej v klubu 👋'
@@ -75,10 +75,33 @@ def generate_intro_message() -> dict[str, Any]:
         '- Záznamy přednášek? <#788822884948770846>\n'
         '- Něco jiného? <#769966887055392768> snese cokoliv\n'
         '- Nevíš, jak to tady funguje? Ptej se v <#806215364379148348>'
+    )
+
+    # TODO - replace with Czech version and reformat the string
+    gh_connection_snippet = """
+        '\n\n'
+        It looks like you've mentioned your GitHub profile in your intro message.
+        Would you like to connect your GitHub account to your Discord account? This will allow you to get a special role and access to a private channel. So very fun!
+
+        Here's how to do it:
+        1. Go to Discord settings.
+        2. Navigate to Connections.
+        3. Click on GitHub.
+        4. Authorize the connection.
+
+        If you have any questions, feel free to ask in the #ahoj channel. We're here to help!
+    """
+
+    if intro_message_content.find("github.com/") == True:
+        content = content + gh_connection_snippet
+
+    footer = (
         '\n\n'
         'A nezapomeň, že junior.guru není jenom klub. '
         'Tady aspoň dva odkazy, které fakt nechceš minout: '
     )
+
+    content = content + footer
     view = ui.View(ui.Button(emoji='📖',
                              label='Příručka',
                              url='https://junior.guru/handbook/',
