@@ -46,4 +46,5 @@ async def test_generate_intro_message_with_gh_connection_suggestion():
         If you have any questions, feel free to ask in the #ahoj channel. We're here to help!
     """
 
-    assert gh_connection_snippet in generate_intro_message(message_content)
+
+    assert gh_connection_snippet in generate_intro_message(message_content)["content"]
