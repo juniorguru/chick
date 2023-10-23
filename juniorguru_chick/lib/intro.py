@@ -92,7 +92,7 @@ def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
         If you have any questions, feel free to ask in the #ahoj channel. We're here to help!
     """
 
-    if intro_message_content.find("github.com/") != -1:
+    if "github.com/" in intro_message_content:
         content = content + gh_connection_snippet
 
     footer = (
