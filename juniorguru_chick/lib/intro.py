@@ -1,5 +1,6 @@
 import re
 from typing import Any
+from textwrap import dedent
 
 from discord import ui, ButtonStyle, Message, MessageType
 
@@ -58,12 +59,15 @@ def choose_intro_emojis(intro_message_content: str) -> list[str]:
 
 
 def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
-    content = (
+    greeting = (
         'Píp, píp! Tady kuře, místní robot. '
         'Vítej v klubu 👋'
         '\n\n'
         'Dík, že se představuješ! '
         'Když o tobě víme víc, můžeme ti líp radit <:meowthumbsup:842730599906279494>'
+    )
+
+    tips = (
         '\n\n'
         'Představení můžeš kdyžtak doplnit či změnit přes tři tečky a „Upravit zprávu“ 📝'
         '\n\n'
@@ -77,23 +81,16 @@ def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
         '- Nevíš, jak to tady funguje? Ptej se v <#806215364379148348>'
     )
 
-    # TODO - replace with Czech version and reformat the string
-    gh_connection_snippet = """
+    gh_connection_snippet = (
         '\n\n'
-        It looks like you've mentioned your GitHub profile in your intro message.
-        Would you like to connect your GitHub account to your Discord account? This will allow you to get a special role and access to a private channel. So very fun!
-
-        Here's how to do it:
-        1. Go to Discord settings.
-        2. Navigate to Connections.
-        3. Click on GitHub.
-        4. Authorize the connection.
-
-        If you have any questions, feel free to ask in the #ahoj channel. We're here to help!
-    """
-
-    if "github.com/" in intro_message_content:
-        content = content + gh_connection_snippet
+        'Vidím, že máš **profil na GitHubu**. Když si GitHub propojíš s Discordem, bude tvůj profil viditelnější. Do budoucna navíc chystáme pro lidi s propojeným GitHub profilem spoustu vychytávek <a:yayfrog:976193164471853097> '
+        '\n\n'
+        '1. Jdi do [nastavení](https://discord.com/channels/@me) '
+        '\n'
+        '2. Klikni na Propojení (_Connections_). '
+        '\n'
+        '3. Přidej GitHub. '
+    )
 
     footer = (
         '\n\n'
@@ -101,7 +98,15 @@ def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
         'Tady aspoň dva odkazy, které fakt nechceš minout: '
     )
 
-    content = content + footer
+    """Compose the greeting message depending on the intro message content"""
+    content = greeting
+
+    if "github.com/" in intro_message_content:
+        content = content + gh_connection_snippet
+
+    content = content + tips + footer
+    content = dedent(content)
+
     view = ui.View(ui.Button(emoji='📖',
                              label='Příručka',
                              url='https://junior.guru/handbook/',
