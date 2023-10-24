@@ -21,7 +21,7 @@ PATTERNS_EMOJIS_MAPPING = {
     re.compile(r'\blinux\w*\b', re.I): ['<:tux:842343455845515264>'],
     re.compile(r'\bswift\w*\b', re.I): ['<:swift:900831808814473266>'],
     re.compile(r'\bdjang\w+\b', re.I): ['<:django:844534232297504779>'],
-    re.compile(r'\bflask\w*\b', re.I): ['<:flask:844534214904905748>'],
+    re.compile(r'\bflask\w*\b', re.I): ['<:flask:1166303630001975367>'],
     re.compile(r'\bpandas\b', re.I): ['<:pandas:844567908688461854>'],
     re.compile(r'\bexcel\w*\b', re.I): ['<:excel:960457644504674314>'],
     re.compile(r'\bpower ?bi\b', re.I): ['<:powerbi:960457607745794119>'],
