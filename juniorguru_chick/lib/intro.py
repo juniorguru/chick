@@ -1,5 +1,6 @@
 import re
 from typing import Any
+from textwrap import dedent
 
 from discord import ui, ButtonStyle, Message, MessageType
 
@@ -57,13 +58,16 @@ def choose_intro_emojis(intro_message_content: str) -> list[str]:
     return ["👋", "🐣", "👍"] + list(emojis)
 
 
-def generate_intro_message() -> dict[str, Any]:
-    content = (
+def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
+    greeting = (
         'Píp, píp! Tady kuře, místní robot. '
         'Vítej v klubu 👋'
         '\n\n'
         'Dík, že se představuješ! '
         'Když o tobě víme víc, můžeme ti líp radit <:meowthumbsup:842730599906279494>'
+    )
+
+    tips = (
         '\n\n'
         'Představení můžeš kdyžtak doplnit či změnit přes tři tečky a „Upravit zprávu“ 📝'
         '\n\n'
@@ -75,10 +79,34 @@ def generate_intro_message() -> dict[str, Any]:
         '- Záznamy přednášek? <#788822884948770846>\n'
         '- Něco jiného? <#769966887055392768> snese cokoliv\n'
         '- Nevíš, jak to tady funguje? Ptej se v <#806215364379148348>'
+    )
+
+    gh_connection_snippet = (
+        '\n\n'
+        'Vidím, že máš **profil na GitHubu**. Když si GitHub propojíš s Discordem, bude tvůj profil viditelnější. Do budoucna navíc chystáme pro lidi s propojeným GitHub profilem spoustu vychytávek <a:yayfrog:976193164471853097> '
+        '\n\n'
+        '1. Jdi do [nastavení](https://discord.com/channels/@me) '
+        '\n'
+        '2. Klikni na Propojení (_Connections_). '
+        '\n'
+        '3. Přidej GitHub. '
+    )
+
+    footer = (
         '\n\n'
         'A nezapomeň, že junior.guru není jenom klub. '
         'Tady aspoň dva odkazy, které fakt nechceš minout: '
     )
+
+    # Compose the greeting message depending on the intro message content
+    content = greeting
+
+    if "github.com/" in intro_message_content:
+        content = content + gh_connection_snippet
+
+    content = content + tips + footer
+    content = dedent(content)
+
     view = ui.View(ui.Button(emoji='📖',
                              label='Příručka',
                              url='https://junior.guru/handbook/',
