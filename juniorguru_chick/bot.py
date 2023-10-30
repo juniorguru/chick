@@ -86,8 +86,8 @@ async def handle_intro_thread(starting_message: discord.Message, thread: discord
     tasks.extend([starting_message.add_reaction(emoji) for emoji in emojis])
     await asyncio.gather(*tasks)
 
-async def manage_intro_thread(thread: discord.Thread, starting_message: str):
-    await thread.send(**intro.generate_intro_message(starting_message))
+async def manage_intro_thread(thread: discord.Thread, intro_message_content: str):
+    await thread.send(**intro.generate_intro_message(intro_message_content))
     await add_members_with_role(thread, intro.GREETER_ROLE_ID)
 
 

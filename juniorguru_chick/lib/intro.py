@@ -1,6 +1,5 @@
 import re
 from typing import Any
-from textwrap import dedent
 
 from discord import ui, ButtonStyle, Message, MessageType
 
@@ -98,7 +97,7 @@ def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
         'Tady aspoň dva odkazy, které fakt nechceš minout: '
     )
 
-    """Compose the greeting message depending on the intro message content"""
+    # Compose the greeting message depending on the intro message content
     content = greeting
 
     if "github.com/" in intro_message_content:
