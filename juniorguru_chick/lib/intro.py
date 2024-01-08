@@ -76,7 +76,7 @@ def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
         '- Vybíráš kurz? Založ vlákno v <#1075052469303906335>\n'
         '- Hledáš konkrétní recenze? Zkus vyhledávání\n'
         '- Dotaz? Hurá do <#1067439203983568986>\n'
-        '- Záznamy přednášek? <#788822884948770846>\n'
+        '- Záznamy přednášek? <#1169636415387205632>\n'
         '- Něco jiného? <#769966887055392768> snese cokoliv\n'
         '- Nevíš, jak to tady funguje? Ptej se v <#806215364379148348>'
     )
