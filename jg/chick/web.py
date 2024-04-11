@@ -7,7 +7,7 @@ from aiohttp.web import Application, RouteTableDef, json_response, Request, Resp
 LAUNCH_AT = datetime.utcnow()
 
 
-logger = logging.getLogger("chick.web")
+logger = logging.getLogger("jg.chick.web")
 
 
 web = Application()

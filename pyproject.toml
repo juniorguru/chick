@@ -10,7 +10,7 @@ repository = "https://github.com/juniorguru/juniorguru-chick/"
 packages = [{include = "juniorguru_chick"}]
 
 [tool.poetry.scripts]
-jgc = "juniorguru_chick.main:main"
+chick = "jg.chick.cli:main"
 
 [tool.poetry.dependencies]
 python = "3.11.*"

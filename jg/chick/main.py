@@ -9,7 +9,7 @@ from juniorguru_chick.bot import bot
 
 
 logging.basicConfig()
-logger = logging.getLogger("chick")
+logger = logging.getLogger("jg.chick")
 logger.setLevel(logging.INFO)
 
 

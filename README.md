@@ -39,7 +39,7 @@ The original, asynchronous bot installs and uses this codebase to run the same c
 
 -   Set the `DISCORD_API_KEY` environment variable to your Discord bot token.
     Using [direnv](https://direnv.net/) might help setting environment variables automatically in your shell when you navigate to the project directory.
--   Run `poetry run jgc` to start the bot.
+-   Run `poetry run chick` to start the bot.
 -   Press <kbd>Ctrl+C</kbd> to stop the bot.
 
 ## Deployment

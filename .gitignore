@@ -130,4 +130,4 @@ dmypy.json
 .pyre/
 
 # Library
-!juniorguru_chick/lib/
+!jg/chick/lib/

@@ -8,7 +8,7 @@ from juniorguru_chick.lib import intro
 from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, ensure_thread_name, add_members_with_role, name_thread
 
 
-logger = logging.getLogger("chick.bot")
+logger = logging.getLogger("jg.chick.bot")
 
 
 bot = commands.Bot(intents=discord.Intents(guilds=True,
