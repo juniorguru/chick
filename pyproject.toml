@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "juniorguru-chick"
-version = "0.0.0"
+name = "jg.chick"
+version = "0.0"
 description = "A real-time, synchronous junior.guru Discord bot"
 authors = ["Honza Javorek <mail@honzajavorek.cz>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://junior.guru/club/"
-repository = "https://github.com/juniorguru/juniorguru-chick/"
-packages = [{include = "juniorguru_chick"}]
+homepage = "https://junior.guru/"
+repository = "https://github.com/juniorguru/chick/"
+packages = [{ include = "jg" }]
 
 [tool.poetry.scripts]
 chick = "jg.chick.cli:main"
