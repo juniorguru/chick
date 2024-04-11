@@ -4,8 +4,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from jg.chick.lib import intro
-from jg.chick.lib.threads import (
+from chick.lib import intro
+from chick.lib.threads import (
     add_members_with_role,
     ensure_thread_name,
     fetch_starting_message,

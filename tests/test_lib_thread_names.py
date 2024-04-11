@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from jg.chick.lib.threads import name_thread
+from chick.lib.threads import name_thread
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]

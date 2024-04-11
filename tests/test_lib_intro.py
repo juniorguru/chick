@@ -2,7 +2,7 @@ from textwrap import dedent
 
 import pytest
 
-from jg.chick.lib.intro import choose_intro_emojis, generate_intro_message
+from chick.lib.intro import choose_intro_emojis, generate_intro_message
 
 
 def test_choose_intro_emojis():
