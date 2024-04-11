@@ -4,8 +4,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from juniorguru_chick.lib import intro
-from juniorguru_chick.lib.threads import is_thread_created, fetch_starting_message, ensure_thread_name, add_members_with_role, name_thread
+from jg.chick.lib import intro
+from jg.chick.lib.threads import is_thread_created, fetch_starting_message, ensure_thread_name, add_members_with_role, name_thread
 
 
 logger = logging.getLogger("jg.chick.bot")

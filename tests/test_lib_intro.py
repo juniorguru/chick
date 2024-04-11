@@ -1,7 +1,7 @@
 import pytest
 from textwrap import dedent
 
-from juniorguru_chick.lib.intro import choose_intro_emojis, generate_intro_message
+from jg.chick.lib.intro import choose_intro_emojis, generate_intro_message
 
 
 def test_choose_intro_emojis():
