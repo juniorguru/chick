@@ -7,10 +7,10 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://junior.guru/"
 repository = "https://github.com/juniorguru/chick/"
-packages = [{include = "chick", from = "."}]
+packages = [{ include = "jg" }]
 
 [tool.poetry.scripts]
-chick = "chick.main:main"
+chick = "jg.chick.main:main"
 
 [tool.poetry.dependencies]
 python = "3.11.*"

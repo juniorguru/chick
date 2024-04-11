@@ -4,8 +4,8 @@ import os
 
 from aiohttp.web import AppRunner, TCPSite
 
-from chick.bot import bot
-from chick.web import web
+from jg.chick.bot import bot
+from jg.chick.web import web
 
 
 logging.basicConfig()
