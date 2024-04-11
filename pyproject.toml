@@ -2,7 +2,7 @@
 name = "jg.chick"
 version = "0.0"
 description = "A real-time, synchronous junior.guru Discord bot"
-authors = ["Honza Javorek <mail@honzajavorek.cz>"]
+authors = ["Honza Javorek <honza@junior.guru>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://junior.guru/"
