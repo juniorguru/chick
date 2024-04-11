@@ -31,8 +31,8 @@ The original, asynchronous bot installs and uses this codebase to run the same c
 ## Installation
 
 1.  You'll need [poetry](https://python-poetry.org/) installed.
-2.  Clone this repository: `git clone git@github.com:juniorguru/juniorguru-chick.git`
-3.  Go to the project directory: `cd juniorguru-chick`
+2.  Clone this repository: `git clone git@github.com:juniorguru/chick.git`
+3.  Go to the project directory: `cd chick`
 4.  Install the project: `poetry install`
 
 ## Development
@@ -41,6 +41,12 @@ The original, asynchronous bot installs and uses this codebase to run the same c
     Using [direnv](https://direnv.net/) might help setting environment variables automatically in your shell when you navigate to the project directory.
 -   Run `poetry run chick` to start the bot.
 -   Press <kbd>Ctrl+C</kbd> to stop the bot.
+
+Useful commands:
+
+-   To test, run `pytest`.
+-   To format code, run `ruff format`.
+-   To organize imports and fix other issues, run `ruff check --fix`.
 
 ## Deployment
 
