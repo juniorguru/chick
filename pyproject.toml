@@ -20,11 +20,24 @@ aiohttp = "3.9.3"
 [tool.poetry.group.dev.dependencies]
 pytest = "8.1.1"
 pytest-asyncio = "0.23.6"
+pytest-ruff = "0.3.1"
+ruff = "0.3.1"
 
 [tool.pytest.ini_options]
 python_files = "test_*.py *_test.py test.py"
 testpaths = "."
-addopts = "--ff"
+addopts = "--ff --ruff --ruff-format"
+
+[tool.ruff]
+target-version = "py311"
+extend-exclude = ["rule_template"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+lines-after-imports = 2
 
 [build-system]
 requires = ["poetry-core"]
