@@ -170,6 +170,7 @@ async def handle_review_thread(
         logger.info(f"Done reviewing {github_url}: {summary.status}")
         for message in format_summary(summary):
             await thread.send(**message)
+        await thread.send("✨ Hotovo!")
 
     if linkedin_url := find_linkedin_url(starting_message.content):
         logger.info(f"Found {linkedin_url} in {thread.name!r}, reviewing…")
