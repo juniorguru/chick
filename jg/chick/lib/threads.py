@@ -1,11 +1,10 @@
+import re
 from datetime import datetime
 
 import discord
-import re
 
 
-DAYS = ["Pondělní", "Úterní", "Středeční",
-        "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
+DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
 
 def is_thread_created(message: discord.Message) -> bool:
@@ -24,9 +23,13 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
     except discord.errors.NotFound:
         return None
 
-def name_thread(message: discord.Message, name_template, alternative_name_template=None) -> str | None:
+
+def name_thread(
+    message: discord.Message, name_template, alternative_name_template=None
+) -> str | None:
     """If the message includes text in square brackets, use that as name for the thread. Otherwise, use the provided name template."""
-    brackets_regex = re.compile(r"""
+    brackets_regex = re.compile(
+        r"""
         ^
         \[     # starts with [
             (?P<bracket_content>
@@ -35,9 +38,11 @@ def name_thread(message: discord.Message, name_template, alternative_name_templa
                 [^\]]   # not a closing bracket
             )
         \]     # ends with ]
-    """, re.VERBOSE)
+    """,
+        re.VERBOSE,
+    )
 
-    if (match:= re.match(brackets_regex, message.content)) is not None:
+    if (match := re.match(brackets_regex, message.content)) is not None:
         content = match.group("bracket_content")
         parts = content.split(",")
         words = []
@@ -45,12 +50,16 @@ def name_thread(message: discord.Message, name_template, alternative_name_templa
             words.append(part.strip())
         name_from_brackets = ", ".join(words)
 
-        name = alternative_name_template.format(author=message.author.display_name, name=name_from_brackets)
+        name = alternative_name_template.format(
+            author=message.author.display_name, name=name_from_brackets
+        )
         return name
 
     else:
         weekday = datetime.now().weekday()
-        name = name_template.format(weekday=DAYS[weekday], author=message.author.display_name)
+        name = name_template.format(
+            weekday=DAYS[weekday], author=message.author.display_name
+        )
         return name
 
 
