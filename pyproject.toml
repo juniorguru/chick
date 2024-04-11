@@ -16,6 +16,7 @@ chick = "jg.chick.main:main"
 python = "3.11.*"
 py-cord = {version = "2.5.0", extras = ["speed"]}
 aiohttp = "3.9.3"
+"jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "8.1.1"
@@ -40,6 +41,7 @@ extend-select = ["I"]
 [tool.ruff.lint.isort]
 combine-as-imports = true
 lines-after-imports = 2
+known-third-party = ["jg.hen"]
 
 [build-system]
 requires = ["poetry-core"]

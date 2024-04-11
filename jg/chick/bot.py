@@ -87,18 +87,23 @@ async def on_thread_create(thread: discord.Thread) -> None:
     if not starting_message:
         logger.warning(f"Thread {thread.name!r} has no starting message, skipping")
         return
-    is_bot = starting_message.author == bot.user
+
+    if starting_message.author == bot.user:
+        logger.info("Thread created by the bot itself, skipping")
+        return
 
     if channel_name == "ahoj":
-        await handle_intro_thread(starting_message, thread, is_bot)
+        await handle_intro_thread(starting_message, thread)
     elif channel_name == "práce-inzeráty":
-        await handle_job_posting_thread(starting_message, thread, is_bot)
+        await handle_job_posting_thread(starting_message, thread)
     elif channel_name == "práce-hledám":
-        await handle_candidate_thread(starting_message, thread, is_bot)
+        await handle_candidate_thread(starting_message, thread)
+    elif channel_name == "cv-github-linkedin":
+        await handle_review_thread(starting_message, thread)
 
 
 async def handle_intro_thread(
-    starting_message: discord.Message, thread: discord.Thread, is_bot: bool
+    starting_message: discord.Message, thread: discord.Thread
 ) -> None:
     emojis = intro.choose_intro_emojis(starting_message.content)
     logger.info(
@@ -112,26 +117,29 @@ async def handle_intro_thread(
     await asyncio.gather(*tasks)
 
 
-async def manage_intro_thread(thread: discord.Thread, intro_message_content: str):
+async def manage_intro_thread(
+    thread: discord.Thread, intro_message_content: str
+) -> None:
     await thread.send(**intro.generate_intro_message(intro_message_content))
     await add_members_with_role(thread, intro.GREETER_ROLE_ID)
 
 
 async def handle_job_posting_thread(
-    starting_message: discord.Message, thread: discord.Thread, is_bot: bool
+    starting_message: discord.Message, thread: discord.Thread
 ) -> None:
-    if is_bot:
-        logger.info("Message sent by the bot itself, skipping")
-        return
-    logger.info(f"Processing thread {thread.name!r} (reacting with ĎK)")
+    logger.info(f"Reacting to {thread.name!r} with ĎK")
     await starting_message.add_reaction("<:dk:842727526736068609>")
 
 
 async def handle_candidate_thread(
-    starting_message: discord.Message, thread: discord.Thread, is_bot: bool
+    starting_message: discord.Message, thread: discord.Thread
 ) -> None:
-    if is_bot:
-        logger.info("Message sent by the bot itself, skipping")
-        return
-    logger.info(f"Processing thread {thread.name!r} (reacting with 👍)")
+    logger.info(f"Reacting to {thread.name!r} with 👍")
     await starting_message.add_reaction("👍")
+
+
+async def handle_review_thread(
+    starting_message: discord.Message, thread: discord.Thread
+) -> None:
+    logger.info(f"Reacting to {thread.name!r} with 🔬")
+    await starting_message.add_reaction("🔬")
