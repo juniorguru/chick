@@ -131,3 +131,6 @@ dmypy.json
 
 # Library
 !jg/chick/lib/
+
+# Ruff
+.ruff_cache
