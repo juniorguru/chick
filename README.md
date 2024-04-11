@@ -1,10 +1,10 @@
-# juniorguru-chick
+# Chick 🐤
 
 A real-time, synchronous junior.guru Discord bot.
 
-## Purpose
+## Features
 
-All junior.guru automation happens asynchronously (with up-to-24h delay), except of the following tasks provided by this bot:
+All junior.guru automation happens asynchronously (with up-to-24h delay) in the [main monolith codebase](https://github.com/juniorguru/junior.guru), except of the following tasks provided by this bot:
 
 - [x] Creating threads in #past-vedle-pasti
 - [x] Creating threads in #můj-dnešní-objev
@@ -20,13 +20,13 @@ _Please, update the above list if adding features._
 
 The original, asynchronous bot installs and uses this codebase to run the same code and perform the same tasks, idempotently:
 
--   If this bot crashes, the asynchronous bot will do the same stuff, just slower.
+-   If this bot crashes, the asynchronous bot will do the same stuff, just with a delay.
 -   The purpose of this bot is to provide non-critical progressive enhancement, which can be dropped at any moment.
 -   To keep the architecture simple, this bot should have no state.
     There should be no database.
     It should only react to the state and events of the Discord server, and write to the Discord server.
 -   The asynchronous bot should monitor whether this bot is up and running.
-    If it's not, it should fail the build, but non-critically (similar to checking broken links).
+    If it's not, it should fail the build, but non-critically (similar to checking broken links in HTML).
 
 ## Installation
 
@@ -36,6 +36,8 @@ The original, asynchronous bot installs and uses this codebase to run the same c
 4.  Install the project: `poetry install`
 
 ## Development
+
+Running locally:
 
 -   Set the `DISCORD_API_KEY` environment variable to your Discord bot token.
     Using [direnv](https://direnv.net/) might help setting environment variables automatically in your shell when you navigate to the project directory.
