@@ -1,19 +1,17 @@
 import asyncio
 import logging
-import os
 
+import click
 from aiohttp.web import AppRunner, TCPSite
 
 from jg.chick.bot import bot
 from jg.chick.web import web
 
 
-logging.basicConfig()
 logger = logging.getLogger("jg.chick")
-logger.setLevel(logging.INFO)
 
 
-async def run(host, port, api_key) -> None:
+async def run(host, port, discord_api_key) -> None:
     # inspired by https://stackoverflow.com/a/54462411/325365
     logger.info(f"Starting the web app at {host}:{port}")
     runner = AppRunner(web)
@@ -23,7 +21,7 @@ async def run(host, port, api_key) -> None:
 
     logger.info("Starting the Discord bot")
     try:
-        await bot.start(api_key)
+        await bot.start(discord_api_key)
     except:
         await bot.close()
         raise
@@ -31,15 +29,20 @@ async def run(host, port, api_key) -> None:
         await runner.cleanup()
 
 
-def main() -> None:
-    logger.info("Configuring")
-    host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", "8080"))
-    api_key = os.environ["DISCORD_API_KEY"]
+@click.command()
+@click.option("-d", "--debug", default=False, is_flag=True, help="Show debug logs.")
+@click.option("-h", "--host", envvar="HOST", default="0.0.0.0", help="Web app host.")
+@click.option(
+    "-p", "--port", envvar="PORT", default=8080, help="Web app port.", type=int
+)
+@click.option("--discord-api-key", envvar="DISCORD_API_KEY", help="Discord API key.")
+def main(debug: bool, host: str, port: int, discord_api_key: str) -> None:
+    logging.basicConfig()
+    logging.getLogger("jg").setLevel(logging.DEBUG if debug else logging.INFO)
 
     logger.info("Starting")
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(run(host, port, api_key))
+        loop.run_until_complete(run(host, port, discord_api_key))
     except KeyboardInterrupt:
         logger.info("Terminating")

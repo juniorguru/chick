@@ -11,7 +11,13 @@ from jg.chick.lib.intro import (
     choose_intro_emojis,
     generate_intro_message,
 )
-from jg.chick.lib.reviews import find_github_url, find_linkedin_url, REVIEWER_ROLE_ID
+from jg.chick.lib.reviews import (
+    GITHUB_API_KEY,
+    REVIEWER_ROLE_ID,
+    find_github_url,
+    find_linkedin_url,
+    format_summary,
+)
 from jg.chick.lib.threads import (
     add_members_with_role,
     ensure_thread_name,
@@ -35,6 +41,12 @@ bot = commands.Bot(
 async def on_ready() -> None:
     for guild in bot.guilds:
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
+
+
+@bot.event
+async def on_error(self, event, *args, **kwargs):
+    logger.exception(f"Error while handling {event!r}")
+    raise
 
 
 @bot.event
@@ -64,9 +76,7 @@ async def on_message(message: discord.Message) -> None:
     logger.info(f"Message sent to {channel_name!r}")
 
     if channel_name == "ahoj":
-        await message.create_thread(
-            name=name_thread(message, intro.THREAD_NAME_TEMPLATE)
-        )
+        await message.create_thread(name=name_thread(message, THREAD_NAME_TEMPLATE))
     elif channel_name == "past-vedle-pasti":
         await message.create_thread(
             name=name_thread(
@@ -151,17 +161,25 @@ async def handle_review_thread(
     if github_url := find_github_url(starting_message.content):
         logger.info(f"Found {github_url} in {thread.name!r}, reviewing…")
         await starting_message.add_reaction("🔬")
-        await thread.send(f"Vidím, že máš GitHub profil: {github_url} 🔬")
-        summary = await check_profile_url(github_url)
-        logger.info(f"Done reviewing {github_url}")
-        await thread.send(f"Hotovo: {summary.status}")
+        await thread.send(
+            f"<:github:842685206095724554> Vidím, že máš GitHub profil: {github_url}",
+            suppress=True,
+        )
+        logger.debug(f"{'Using' if GITHUB_API_KEY else 'Not using'} GitHub API key")
+        summary = await check_profile_url(github_url, github_api_key=GITHUB_API_KEY)
+        logger.info(f"Done reviewing {github_url}: {summary.status}")
+        for message in format_summary(summary):
+            await thread.send(**message)
 
     if linkedin_url := find_linkedin_url(starting_message.content):
         logger.info(f"Found {linkedin_url} in {thread.name!r}, reviewing…")
         await starting_message.add_reaction("🔬")
-        await thread.send(f"Vidím, že máš LinkedIn profil: {linkedin_url} 🔬")
         await thread.send(
-            "Na LinkedIn zatím zpětnou vazbu dávat neumím, ale třeba pomůže někdo jiný."
+            (
+                f"<:linkedin:915267970752712734> Vidím, že máš LinkedIn profil: {linkedin_url}\n\n"
+                "Na LinkedIn zatím zpětnou vazbu dávat neumím, ale třeba pomůže někdo jiný 🙏"
+            ),
+            suppress=True,
         )
 
     await add_members_with_role(thread, REVIEWER_ROLE_ID)

@@ -1,8 +1,17 @@
+import os
 import re
+from typing import Any, Generator
 from urllib.parse import quote, unquote
 
+from discord import Color, Embed
+from jg.hen.core import ResultType, Summary
+
+
+MAINTAINER_ID = 668226181769986078
 
 REVIEWER_ROLE_ID = 1075044541796716604
+
+GITHUB_API_KEY = os.getenv("GITHUB_API_KEY") or None
 
 GITHUB_URL_RE = re.compile(r"github\.com/(?P<username>[\w-]+)")
 
@@ -21,3 +30,25 @@ def find_linkedin_url(text: str) -> str | None:
         username = quote(unquote(match.group("username")))
         return f"https://www.linkedin.com/in/{username}/"
     return ""
+
+
+def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
+    if summary.status == "error":
+        yield dict(
+            content=(
+                f"🔬 Kouklo jsem na ten GitHub, ale bohužel to skončilo chybou 🤕\n"
+                f"```\n{summary.error}\n```\n"
+                f"<@{MAINTAINER_ID}>, mrkni na to, prosím."
+            ),
+            suppress=True,
+        )
+    else:
+        yield dict(content="🔬 Tak jsem kouklo na ten GitHub.")
+        for result in summary.results:
+            embed = Embed(
+                color=(
+                    Color.green() if result.type == ResultType.DONE else Color.orange()
+                ),
+                description=f"{result.message}\n[Další info]({result.docs_url})",
+            )
+            yield dict(embed=embed)

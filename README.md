@@ -12,7 +12,7 @@ All junior.guru automation happens asynchronously (with up-to-24h delay) in the 
 - [x] Reacting to member-made threads in #práce-hledám
 - [x] Creating threads in #ahoj
 - [x] Greeting new members in #ahoj
-- [ ] Providing reviews to GitHub profiles submitted to #cv-github-linkedin
+- [x] Providing reviews to GitHub profiles submitted to #cv-github-linkedin
 - [ ] Saving pins to members' DMs [#13](https://github.com/juniorguru/juniorguru-chick/issues/13)
 
 _Please, update the above list if adding features._
@@ -41,12 +41,15 @@ The original, asynchronous bot installs and uses this codebase to run the same c
 Running locally:
 
 -   Set the `DISCORD_API_KEY` environment variable to your Discord bot token.
+    Set the `GITHUB_API_KEY` environment variable to your GitHub API token.
     Using [direnv](https://direnv.net/) might help setting environment variables automatically in your shell when you navigate to the project directory.
 -   Run `poetry run chick` to start the bot.
 -   Press <kbd>Ctrl+C</kbd> to stop the bot.
 
 Useful commands:
 
+-   To temporarily turn off production, run `flyctl machine stop`.
+    To bring it back, run `flyctl machine start`.
 -   To test, run `pytest`.
 -   To format code, run `ruff format`.
 -   To organize imports and fix other issues, run `ruff check --fix`.

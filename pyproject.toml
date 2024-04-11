@@ -17,6 +17,7 @@ python = "3.11.*"
 py-cord = {version = "2.5.0", extras = ["speed"]}
 aiohttp = "3.9.3"
 "jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
+click = "8.1.7"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "8.1.1"
