@@ -3,8 +3,15 @@ import logging
 
 import discord
 from discord.ext import commands
+from jg.hen.core import check_profile_url
 
-from jg.chick.lib import intro
+from jg.chick.lib.intro import (
+    GREETER_ROLE_ID,
+    THREAD_NAME_TEMPLATE,
+    choose_intro_emojis,
+    generate_intro_message,
+)
+from jg.chick.lib.reviews import find_github_url, find_linkedin_url, REVIEWER_ROLE_ID
 from jg.chick.lib.threads import (
     add_members_with_role,
     ensure_thread_name,
@@ -105,12 +112,12 @@ async def on_thread_create(thread: discord.Thread) -> None:
 async def handle_intro_thread(
     starting_message: discord.Message, thread: discord.Thread
 ) -> None:
-    emojis = intro.choose_intro_emojis(starting_message.content)
+    emojis = choose_intro_emojis(starting_message.content)
     logger.info(
         f"Processing thread {thread.name!r} (reacting with {emojis!r} and more…)"
     )
     tasks = [
-        ensure_thread_name(thread, intro.THREAD_NAME_TEMPLATE),
+        ensure_thread_name(thread, THREAD_NAME_TEMPLATE),
         manage_intro_thread(thread, starting_message.content),
     ]
     tasks.extend([starting_message.add_reaction(emoji) for emoji in emojis])
@@ -120,8 +127,8 @@ async def handle_intro_thread(
 async def manage_intro_thread(
     thread: discord.Thread, intro_message_content: str
 ) -> None:
-    await thread.send(**intro.generate_intro_message(intro_message_content))
-    await add_members_with_role(thread, intro.GREETER_ROLE_ID)
+    await thread.send(**generate_intro_message(intro_message_content))
+    await add_members_with_role(thread, GREETER_ROLE_ID)
 
 
 async def handle_job_posting_thread(
@@ -141,5 +148,20 @@ async def handle_candidate_thread(
 async def handle_review_thread(
     starting_message: discord.Message, thread: discord.Thread
 ) -> None:
-    logger.info(f"Reacting to {thread.name!r} with 🔬")
-    await starting_message.add_reaction("🔬")
+    if github_url := find_github_url(starting_message.content):
+        logger.info(f"Found {github_url} in {thread.name!r}, reviewing…")
+        await starting_message.add_reaction("🔬")
+        await thread.send(f"Vidím, že máš GitHub profil: {github_url} 🔬")
+        summary = await check_profile_url(github_url)
+        logger.info(f"Done reviewing {github_url}")
+        await thread.send(f"Hotovo: {summary.status}")
+
+    if linkedin_url := find_linkedin_url(starting_message.content):
+        logger.info(f"Found {linkedin_url} in {thread.name!r}, reviewing…")
+        await starting_message.add_reaction("🔬")
+        await thread.send(f"Vidím, že máš LinkedIn profil: {linkedin_url} 🔬")
+        await thread.send(
+            "Na LinkedIn zatím zpětnou vazbu dávat neumím, ale třeba pomůže někdo jiný."
+        )
+
+    await add_members_with_role(thread, REVIEWER_ROLE_ID)
