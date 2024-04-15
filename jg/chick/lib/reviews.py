@@ -17,6 +17,13 @@ GITHUB_URL_RE = re.compile(r"github\.com/(?P<username>[\w-]+)")
 
 LINKEDIN_URL_RE = re.compile(r"linkedin\.com/in/(?P<username>[^\s\/]+)")
 
+COLORS = {
+    ResultType.ERROR: Color.red(),
+    ResultType.WARNING: Color.orange(),
+    ResultType.INFO: Color.blue(),
+    ResultType.DONE: Color.green(),
+}
+
 
 def find_github_url(text: str) -> str | None:
     if match := GITHUB_URL_RE.search(text):
@@ -46,9 +53,7 @@ def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
         yield dict(content="🔬 Tak jsem kouklo na ten GitHub.")
         for result in summary.results:
             embed = Embed(
-                color=(
-                    Color.green() if result.type == ResultType.DONE else Color.orange()
-                ),
-                description=f"{result.message}\n[Další info]({result.docs_url})",
+                color=COLORS[result.type],
+                description=f"{result.message}\nℹ️ [Vysvětlení]({result.docs_url})",
             )
             yield dict(embed=embed)
