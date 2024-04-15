@@ -6,6 +6,20 @@ import discord
 
 DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
 
+BRACKETS_RE = re.compile(
+    r"""
+        ^
+        \[     # starts with [
+            (?P<bracket_content>
+                .*      # any number of any characters
+                [^\s]   # not a whitespace
+                [^\]]   # not a closing bracket
+            )
+        \]     # ends with ]
+    """,
+    re.VERBOSE,
+)
+
 
 def is_thread_created(message: discord.Message) -> bool:
     """Checks if given message is a system 'thread created' announcement"""
@@ -25,42 +39,30 @@ async def fetch_starting_message(thread: discord.Thread) -> discord.Message | No
 
 
 def name_thread(
-    message: discord.Message, name_template, alternative_name_template=None
-) -> str | None:
-    """If the message includes text in square brackets, use that as name for the thread. Otherwise, use the provided name template."""
-    brackets_regex = re.compile(
-        r"""
-        ^
-        \[     # starts with [
-            (?P<bracket_content>
-                .*      # any number of any characters
-                [^\s]   # not a whitespace
-                [^\]]   # not a closing bracket
-            )
-        \]     # ends with ]
-    """,
-        re.VERBOSE,
-    )
-
-    if (match := re.match(brackets_regex, message.content)) is not None:
+    message: discord.Message,
+    name_template: str,
+    bracket_name_template: str | None = None,
+) -> str:
+    """
+    If the message includes text in square brackets, use that as name for the thread.
+    Otherwise, use the provided name template.
+    """
+    if bracket_name_template and (match := BRACKETS_RE.match(message.content)):
         content = match.group("bracket_content")
         parts = content.split(",")
         words = []
         for part in parts:
             words.append(part.strip())
         name_from_brackets = ", ".join(words)
-
-        name = alternative_name_template.format(
-            author=message.author.display_name, name=name_from_brackets
+        return bracket_name_template.format(
+            author=message.author.display_name,
+            bracket_content=name_from_brackets,
         )
-        return name
-
-    else:
-        weekday = datetime.now().weekday()
-        name = name_template.format(
-            weekday=DAYS[weekday], author=message.author.display_name
-        )
-        return name
+    weekday = datetime.now().weekday()
+    return name_template.format(
+        weekday=DAYS[weekday],
+        author=message.author.display_name,
+    )
 
 
 async def ensure_thread_name(thread: discord.Thread, name_template) -> str | None:

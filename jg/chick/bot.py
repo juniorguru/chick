@@ -7,7 +7,7 @@ from jg.hen.core import check_profile_url
 
 from jg.chick.lib.intro import (
     GREETER_ROLE_ID,
-    THREAD_NAME_TEMPLATE,
+    THREAD_NAME_TEMPLATE as INTRO_THREAD_NAME_TEMPLATE,
     choose_intro_emojis,
     generate_intro_message,
 )
@@ -76,17 +76,23 @@ async def on_message(message: discord.Message) -> None:
     logger.info(f"Message sent to {channel_name!r}")
 
     if channel_name == "ahoj":
-        await message.create_thread(name=name_thread(message, THREAD_NAME_TEMPLATE))
+        await message.create_thread(
+            name=name_thread(message, INTRO_THREAD_NAME_TEMPLATE)
+        )
     elif channel_name == "past-vedle-pasti":
         await message.create_thread(
             name=name_thread(
-                message, "{weekday} past na {author}", "Past na {author}: {name}"
+                message,
+                "{weekday} past na {author}",
+                bracket_name_template="Past na {author}: {bracket_content}",
             )
         )
     elif channel_name == "můj-dnešní-objev":
         await message.create_thread(
             name=name_thread(
-                message, "{weekday} objev od {author}", "Objev od {author}: {name}"
+                message,
+                "{weekday} objev od {author}",
+                bracket_name_template="Objev od {author}: {bracket_content}",
             )
         )
 
@@ -127,7 +133,7 @@ async def handle_intro_thread(
         f"Processing thread {thread.name!r} (reacting with {emojis!r} and more…)"
     )
     tasks = [
-        ensure_thread_name(thread, THREAD_NAME_TEMPLATE),
+        ensure_thread_name(thread, INTRO_THREAD_NAME_TEMPLATE),
         manage_intro_thread(thread, starting_message.content),
     ]
     tasks.extend([starting_message.add_reaction(emoji) for emoji in emojis])

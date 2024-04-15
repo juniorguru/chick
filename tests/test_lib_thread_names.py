@@ -1,5 +1,7 @@
 from datetime import datetime
+from typing import cast
 
+import discord
 import pytest
 
 from jg.chick.lib.threads import name_thread
@@ -9,7 +11,7 @@ DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", 
 
 
 class Message:
-    def __init__(self, display_name, message):
+    def __init__(self, display_name: str, message: str):
         self.author = lambda: None
         self.author.display_name = display_name
         self.content = message
@@ -20,7 +22,7 @@ def test_name_thread_no_brackets():
     weekday = datetime.now().weekday()
     name_template = "{weekday} objev od {author}"
     expected_name = f"{DAYS[weekday]} objev od Jana"
-    message = Message("Jana", content)
+    message = cast(discord.Message, Message("Jana", content))
 
     assert name_thread(message, name_template) == expected_name
 
@@ -33,11 +35,11 @@ def test_name_thread_no_brackets():
         pytest.param("Hello this is my thread]", id="brackets not opened"),
     ],
 )
-def test_brackets_used_incorrectly(content):
+def test_brackets_used_incorrectly(content: str):
     weekday = datetime.now().weekday()
     name_template = "{weekday} objev od {author}"
     expected_name = f"{DAYS[weekday]} objev od Jana"
-    message = Message("Jana", content)
+    message = cast(discord.Message, Message("Jana", content))
 
     assert name_thread(message, name_template) == expected_name
 
@@ -47,7 +49,7 @@ def test_no_text_in_brackets():
     weekday = datetime.now().weekday()
     name_template = "{weekday} objev od {author}"
     expected_name = f"{DAYS[weekday]} objev od Jana"
-    message = Message("Jana", content)
+    message = cast(discord.Message, Message("Jana", content))
 
     assert name_thread(message, name_template) == expected_name
 
@@ -77,11 +79,12 @@ def test_no_text_in_brackets():
         ),
     ],
 )
-def test_parse_message_in_brackets(content, expected_name):
-    message = Message("Jana", content)
+def test_parse_message_in_brackets(content: str, expected_name: str):
+    message = cast(discord.Message, Message("Jana", content))
     name_template = "{weekday} objev od {author}"
-    alternative_name_template = "Objev od {author}: {name}"
+    bracket_name_template = "Objev od {author}: {bracket_content}"
 
     assert (
-        name_thread(message, name_template, alternative_name_template) == expected_name
+        name_thread(message, name_template, bracket_name_template=bracket_name_template)
+        == expected_name
     )
