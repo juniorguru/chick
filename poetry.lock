@@ -647,7 +647,7 @@ pillow = "10.3.0"
 type = "git"
 url = "https://github.com/juniorguru/hen.git"
 reference = "HEAD"
-resolved_reference = "4491386305ed9169f70d34b5e0e2f768fd4fed08"
+resolved_reference = "b8d0397fb2b06b7f6baf3e843dc591777f665556"
 
 [[package]]
 name = "msgspec"
