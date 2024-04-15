@@ -632,7 +632,7 @@ name = "jg-hen"
 version = "0.0"
 description = "Automated GitHub profile review"
 optional = false
-python-versions = "3.11.*"
+python-versions = ">=3.11"
 files = []
 develop = false
 
@@ -647,7 +647,7 @@ pillow = "10.3.0"
 type = "git"
 url = "https://github.com/juniorguru/hen.git"
 reference = "HEAD"
-resolved_reference = "9d2e0f2e2399f249928cb7636151da159d8c00a4"
+resolved_reference = "4491386305ed9169f70d34b5e0e2f768fd4fed08"
 
 [[package]]
 name = "msgspec"
@@ -1328,5 +1328,5 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "2.0"
-python-versions = "3.11.*"
-content-hash = "22a75a2cf43e30e045e8403b5f562ba915cb1e8bfcfd08b0fd3e638beacbd184"
+python-versions = "~3.11"
+content-hash = "e97459bd82aafbb37c90878d9ed1f5087c6a9e4def4cc710a9614d0a88294e41"

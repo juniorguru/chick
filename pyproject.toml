@@ -13,7 +13,7 @@ packages = [{ include = "jg" }]
 chick = "jg.chick.main:main"
 
 [tool.poetry.dependencies]
-python = "3.11.*"
+python = "~3.11"
 py-cord = {version = "2.5.0", extras = ["speed"]}
 aiohttp = "3.9.4"
 "jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
