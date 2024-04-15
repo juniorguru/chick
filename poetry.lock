@@ -632,7 +632,7 @@ name = "jg-hen"
 version = "0.0"
 description = "Automated GitHub profile review"
 optional = false
-python-versions = ">=3.11"
+python-versions = ">=3.11 <4.0"
 files = []
 develop = false
 
@@ -647,7 +647,7 @@ pillow = "10.3.0"
 type = "git"
 url = "https://github.com/juniorguru/hen.git"
 reference = "HEAD"
-resolved_reference = "b8d0397fb2b06b7f6baf3e843dc591777f665556"
+resolved_reference = "e408bb5458fedd93101826760cc8d5e8df410170"
 
 [[package]]
 name = "msgspec"
