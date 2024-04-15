@@ -54,6 +54,6 @@ def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
         for result in summary.results:
             embed = Embed(
                 color=COLORS[result.type],
-                description=f"{result.message}\nℹ️ [Vysvětlení]({result.docs_url})",
+                description=f"{result.message}\n\nℹ️ [Vysvětlení]({result.docs_url})",
             )
             yield dict(embed=embed)

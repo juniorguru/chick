@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import cast
 
 import discord
 from discord.ext import commands
@@ -13,7 +14,6 @@ from jg.chick.lib.intro import (
 )
 from jg.chick.lib.reviews import (
     GITHUB_API_KEY,
-    REVIEWER_ROLE_ID,
     find_github_url,
     find_linkedin_url,
     format_summary,
@@ -51,9 +51,15 @@ async def on_error(self, event, *args, **kwargs):
 
 @bot.event
 async def on_message(message: discord.Message) -> None:
+    if not bot.user:
+        raise RuntimeError("Bot user not initialized")
+
     logger.info("Processing message")
-    if message.author.id == bot.user.id:  # type: ignore
+    if message.author.id == bot.user.id:
         logger.info("Message sent by the bot itself, skipping")
+        return
+    if is_thread_created(message) or message.is_system():
+        logger.info("System message, skipping")
         return
     if message.guild is None:
         logger.info("DM, responding with a canned message")
@@ -68,18 +74,24 @@ async def on_message(message: discord.Message) -> None:
         except discord.errors.Forbidden:
             logger.warning("User has DMs disabled, skipping")
         return
-    if is_thread_created(message) or message.is_system():
-        logger.info("System message, skipping")
+
+    if channel := getattr(message.channel, "parent", None):
+        thread = cast(discord.Thread, message.channel)
+        if channel.name == "cv-github-linkedin" and bot.user.mentioned_in(message):
+            logger.info("Processing mention in #cv-github-linkedin")
+            starting_message = (await fetch_starting_message(thread)) or message
+            await handle_review_thread(starting_message, thread)
         return
 
-    channel_name = message.channel.name  # type: ignore
-    logger.info(f"Message sent to {channel_name!r}")
-
-    if channel_name == "ahoj":
+    channel = cast(discord.GroupChannel, message.channel)
+    if channel.name == "ahoj":
+        logger.info("Creating thread in #ahoj")
         await message.create_thread(
             name=name_thread(message, INTRO_THREAD_NAME_TEMPLATE)
         )
-    elif channel_name == "past-vedle-pasti":
+        return
+    if channel.name == "past-vedle-pasti":
+        logger.info("Creating thread in #past-vedle-pasti")
         await message.create_thread(
             name=name_thread(
                 message,
@@ -87,7 +99,9 @@ async def on_message(message: discord.Message) -> None:
                 bracket_name_template="Past na {author}: {bracket_content}",
             )
         )
-    elif channel_name == "můj-dnešní-objev":
+        return
+    if channel.name == "můj-dnešní-objev":
+        logger.info("Creating thread in #můj-dnešní-objev")
         await message.create_thread(
             name=name_thread(
                 message,
@@ -95,6 +109,7 @@ async def on_message(message: discord.Message) -> None:
                 bracket_name_template="Objev od {author}: {bracket_content}",
             )
         )
+        return
 
 
 @bot.event
@@ -167,8 +182,8 @@ async def handle_review_thread(
     if github_url := find_github_url(starting_message.content):
         logger.info(f"Found {github_url} in {thread.name!r}, reviewing…")
         await starting_message.add_reaction("🔬")
-        await thread.send(
-            f"<:github:842685206095724554> Vidím, že máš GitHub profil: {github_url}",
+        await starting_message.reply(
+            f"<:github:842685206095724554> Zavětřilo jsem GitHub profil {github_url}, jdu se v tom pohrabat…",
             suppress=True,
         )
         logger.debug(f"{'Using' if GITHUB_API_KEY else 'Not using'} GitHub API key")
@@ -181,12 +196,19 @@ async def handle_review_thread(
     if linkedin_url := find_linkedin_url(starting_message.content):
         logger.info(f"Found {linkedin_url} in {thread.name!r}, reviewing…")
         await starting_message.add_reaction("🔬")
-        await thread.send(
+        await starting_message.reply(
             (
-                f"<:linkedin:915267970752712734> Vidím, že máš LinkedIn profil: {linkedin_url}\n\n"
+                f"<:linkedin:915267970752712734> Zavětřilo jsem LinkedIn profil {linkedin_url}\n\n"
                 "Na LinkedIn zatím zpětnou vazbu dávat neumím, ale třeba pomůže někdo jiný 🙏"
             ),
             suppress=True,
         )
 
-    await add_members_with_role(thread, REVIEWER_ROLE_ID)
+    if not (github_url or linkedin_url):
+        await starting_message.reply(
+            "Nenašlo jsem žádný GitHub ani LinkedIn profil. "
+            "Pokud nějaký máš a chceš jej zkontrolovat, přidej sem zprávu, "
+            "ve které mě označíš a bude v ní odkaz na ten profil."
+        )
+
+    # await add_members_with_role(thread, REVIEWER_ROLE_ID)
