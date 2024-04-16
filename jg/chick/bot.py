@@ -261,10 +261,3 @@ async def handle_review_thread(
             linkedin=bool(linkedin_url),
         )
     )
-
-    if not github_url and not linkedin_url:
-        await starting_message.reply(
-            "Nenašlo jsem žádný GitHub ani LinkedIn profil. "
-            "Pokud nějaký máš a chceš jej zkontrolovat, přidej sem zprávu, "
-            "ve které mě označíš a bude v ní odkaz na ten profil."
-        )
