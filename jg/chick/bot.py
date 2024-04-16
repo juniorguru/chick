@@ -42,7 +42,7 @@ bot = commands.Bot(intents=intents)
 
 
 @bot.event
-async def on_ready() -> None:
+async def on_ready():
     for guild in bot.guilds:
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
 
@@ -54,7 +54,7 @@ async def on_error(self, event, *args, **kwargs):
 
 
 @bot.event
-async def on_message(message: discord.Message) -> None:
+async def on_message(message: discord.Message):
     if not bot.user:
         raise RuntimeError("Bot user not initialized")
     if message.author.id == bot.user.id:
@@ -75,7 +75,7 @@ async def on_message(message: discord.Message) -> None:
     return await on_regular_message(bot.user, channel, message)
 
 
-async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message) -> None:
+async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message):
     try:
         response = (
             "Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně. "
@@ -133,7 +133,7 @@ async def on_regular_message(
 
 
 @bot.event
-async def on_thread_create(thread: discord.Thread) -> None:
+async def on_thread_create(thread: discord.Thread):
     if not thread.parent:
         logger.warning(f"Thread {thread.name!r} has no parent, skipping")
         return
@@ -162,7 +162,7 @@ async def on_thread_create(thread: discord.Thread) -> None:
 
 async def handle_intro_thread(
     starting_message: discord.Message, thread: discord.Thread
-) -> None:
+):
     emojis = choose_intro_emojis(starting_message.content)
     logger.info(
         f"Processing thread {thread.name!r} (reacting with {emojis!r} and more…)"
@@ -175,30 +175,28 @@ async def handle_intro_thread(
     await asyncio.gather(*tasks)
 
 
-async def manage_intro_thread(
-    thread: discord.Thread, intro_message_content: str
-) -> None:
+async def manage_intro_thread(thread: discord.Thread, intro_message_content: str):
     await thread.send(**generate_intro_message(intro_message_content))
     await add_members_with_role(thread, GREETER_ROLE_ID)
 
 
 async def handle_job_posting_thread(
     starting_message: discord.Message, thread: discord.Thread
-) -> None:
+):
     logger.info(f"Reacting to {thread.name!r} with ĎK")
     await starting_message.add_reaction("<:dk:842727526736068609>")
 
 
 async def handle_candidate_thread(
     starting_message: discord.Message, thread: discord.Thread
-) -> None:
+):
     logger.info(f"Reacting to {thread.name!r} with 👍")
     await starting_message.add_reaction("👍")
 
 
 async def handle_review_thread(
     starting_message: discord.Message, thread: discord.Thread
-) -> None:
+):
     if github_url := find_github_url(starting_message.content):
         logger.info(f"Found {github_url} in {thread.name!r}, reviewing…")
         await starting_message.add_reaction("🔬")
