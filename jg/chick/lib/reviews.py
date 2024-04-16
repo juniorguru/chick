@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Any, Generator, TypedDict
+from typing import Any, Generator
 from urllib.parse import quote, unquote
 
 from discord import Attachment, Color, Embed, ForumTag, Thread

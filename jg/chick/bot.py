@@ -97,7 +97,7 @@ async def on_thread_message(
     thread: discord.Thread,
     message: discord.Message,
 ):
-    if channel.name == "cv-github-linkedin" and bot_user.mentioned_in(message):
+    if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
         logger.info("Noticed mention in #cv-github-linkedin, starting review")
         starting_message = (await fetch_starting_message(thread)) or message
         await handle_review_thread(starting_message, thread)
