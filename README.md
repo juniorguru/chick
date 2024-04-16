@@ -12,7 +12,7 @@ All junior.guru automation happens asynchronously (with up-to-24h delay) in the 
 - [x] Reacting to member-made threads in #práce-hledám
 - [x] Creating threads in #ahoj
 - [x] Greeting new members in #ahoj
-- [x] Providing reviews to GitHub profiles submitted to #cv-github-linkedin
+- [x] Providing reviews in #cv-github-linkedin
 - [ ] Saving pins to members' DMs [#13](https://github.com/juniorguru/juniorguru-chick/issues/13)
 
 _Please, update the above list if adding features._
