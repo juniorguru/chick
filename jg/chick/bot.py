@@ -30,11 +30,15 @@ from jg.chick.lib.threads import (
 logger = logging.getLogger("jg.chick.bot")
 
 
-bot = commands.Bot(
-    intents=discord.Intents(
-        guilds=True, members=True, messages=True, message_content=True
-    )
+intents = discord.Intents(
+    guilds=True,
+    members=True,
+    messages=True,
+    message_content=True,
 )
+
+
+bot = commands.Bot(intents=intents)
 
 
 @bot.event
@@ -53,8 +57,6 @@ async def on_error(self, event, *args, **kwargs):
 async def on_message(message: discord.Message) -> None:
     if not bot.user:
         raise RuntimeError("Bot user not initialized")
-
-    logger.info("Processing message")
     if message.author.id == bot.user.id:
         logger.info("Message sent by the bot itself, skipping")
         return
@@ -62,53 +64,71 @@ async def on_message(message: discord.Message) -> None:
         logger.info("System message, skipping")
         return
     if message.guild is None:
-        logger.info("DM, responding with a canned message")
-        try:
-            response = (
-                "Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně. "
-                "Tvou zprávu si nikdo nepřečte. Pokud se chceš na něco zeptat, zkus kanál "
-                "https://discord.com/channels/769966886598737931/806215364379148348 "
-                "nebo napiš do soukromé zprávy komukoliv z moderátorů. Rádi tě nasměrují."
-            )
-            await message.reply(response)
-        except discord.errors.Forbidden:
-            logger.warning("User has DMs disabled, skipping")
-        return
-
+        logger.info("Processing DM message")
+        return await on_dm_message(bot.user, message)
     if channel := getattr(message.channel, "parent", None):
+        logger.info("Processing thread message")
         thread = cast(discord.Thread, message.channel)
-        if channel.name == "cv-github-linkedin" and bot.user.mentioned_in(message):
-            logger.info("Processing mention in #cv-github-linkedin")
-            starting_message = (await fetch_starting_message(thread)) or message
-            await handle_review_thread(starting_message, thread)
-        return
-
+        return await on_thread_message(bot.user, channel, thread, message)
+    logger.info("Processing regular message")
     channel = cast(discord.GroupChannel, message.channel)
+    return await on_regular_message(bot.user, channel, message)
+
+
+async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message) -> None:
+    try:
+        response = (
+            "Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně. "
+            "Tvou zprávu si nikdo nepřečte. Pokud se chceš na něco zeptat, zkus kanál "
+            "https://discord.com/channels/769966886598737931/806215364379148348 "
+            "nebo napiš do soukromé zprávy komukoliv z moderátorů. Rádi tě nasměrují."
+        )
+        await message.reply(response)
+    except discord.errors.Forbidden:
+        logger.warning("User has DMs disabled, skipping")
+
+
+async def on_thread_message(
+    bot_user: discord.ClientUser,
+    channel: discord.GroupChannel,
+    thread: discord.Thread,
+    message: discord.Message,
+):
+    if channel.name == "cv-github-linkedin" and bot_user.mentioned_in(message):
+        logger.info("Noticed mention in #cv-github-linkedin, starting review")
+        starting_message = (await fetch_starting_message(thread)) or message
+        await handle_review_thread(starting_message, thread)
+
+
+async def on_regular_message(
+    bot_user: discord.ClientUser,
+    channel: discord.GroupChannel,
+    message: discord.Message,
+):
     if channel.name == "ahoj":
         logger.info("Creating thread in #ahoj")
-        await message.create_thread(
-            name=name_thread(message, INTRO_THREAD_NAME_TEMPLATE)
-        )
+        name = name_thread(message, INTRO_THREAD_NAME_TEMPLATE)
+        await message.create_thread(name=name)
         return
+
     if channel.name == "past-vedle-pasti":
         logger.info("Creating thread in #past-vedle-pasti")
-        await message.create_thread(
-            name=name_thread(
-                message,
-                "{weekday} past na {author}",
-                bracket_name_template="Past na {author}: {bracket_content}",
-            )
+        name = name_thread(
+            message,
+            "{weekday} past na {author}",
+            bracket_name_template="Past na {author}: {bracket_content}",
         )
+        await message.create_thread(name=name)
         return
+
     if channel.name == "můj-dnešní-objev":
         logger.info("Creating thread in #můj-dnešní-objev")
-        await message.create_thread(
-            name=name_thread(
-                message,
-                "{weekday} objev od {author}",
-                bracket_name_template="Objev od {author}: {bracket_content}",
-            )
+        name = name_thread(
+            message,
+            "{weekday} objev od {author}",
+            bracket_name_template="Objev od {author}: {bracket_content}",
         )
+        await message.create_thread(name=name)
         return
 
 
