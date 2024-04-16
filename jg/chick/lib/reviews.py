@@ -3,7 +3,7 @@ import re
 from typing import Any, Generator, TypedDict
 from urllib.parse import quote, unquote
 
-from discord import Color, Embed, ForumTag, Thread
+from discord import Attachment, Color, Embed, ForumTag, Thread
 from jg.hen.core import ResultType, Summary
 
 
@@ -23,6 +23,13 @@ COLORS = {
     ResultType.INFO: Color.blue(),
     ResultType.DONE: Color.green(),
 }
+
+
+def find_cv_url(attachments: list[Attachment]) -> str | None:
+    for attachment in attachments:
+        if attachment.content_type == "application/pdf":
+            return attachment.url
+    return None
 
 
 def find_github_url(text: str) -> str | None:

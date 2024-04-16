@@ -14,6 +14,8 @@ from jg.chick.lib.intro import (
 )
 from jg.chick.lib.reviews import (
     GITHUB_API_KEY,
+    REVIEWER_ROLE_ID,
+    find_cv_url,
     find_github_url,
     find_linkedin_url,
     format_summary,
@@ -198,11 +200,31 @@ async def handle_candidate_thread(
 async def handle_review_thread(
     starting_message: discord.Message, thread: discord.Thread
 ):
+    if cv_url := find_cv_url(starting_message.attachments):
+        logger.info(f"Found CV in {thread.name!r}, reviewing…")
+        await starting_message.add_reaction("🔬")
+        await starting_message.reply(
+            (
+                "📝 Zavětřilo jsem CV"
+                "\n\n"
+                "🙏 Na CV zatím zpětnou vazbu dávat neumím, ale třeba pomůže někdo jiný"
+                "\n\n"
+                "💡 Přečti si [návod na CV](https://junior.guru/handbook/cv/) v příručce, ušetříš spoustu času sobě i nám! "
+                "Ve zpětné vazbě nebudeme muset opakovat rady z návodu a budeme se moci soustředit na to podstatné."
+            ),
+            suppress=True,
+        )
+        await add_members_with_role(thread, REVIEWER_ROLE_ID)
+
     if github_url := find_github_url(starting_message.content):
         logger.info(f"Found {github_url} in {thread.name!r}, reviewing…")
         await starting_message.add_reaction("🔬")
         await starting_message.reply(
-            f"<:github:842685206095724554> Zavětřilo jsem GitHub profil {github_url}, jdu se v tom pohrabat…",
+            (
+                f"<:github:842685206095724554> Zavětřilo jsem [GitHub profil]({github_url}), jdu se v tom pohrabat…"
+                "\n\n"
+                "💡 Přečti si [návod na GitHub profil](https://junior.guru/handbook/github-profile/) v příručce, pochopíš kontext mých doporučení."
+            ),
             suppress=True,
         )
         async with thread.typing():
@@ -218,14 +240,27 @@ async def handle_review_thread(
         await starting_message.add_reaction("🔬")
         await starting_message.reply(
             (
-                f"<:linkedin:915267970752712734> Zavětřilo jsem LinkedIn profil {linkedin_url}\n\n"
-                "Na LinkedIn zatím zpětnou vazbu dávat neumím, ale třeba pomůže někdo jiný 🙏"
+                f"<:linkedin:915267970752712734> Zavětřilo jsem [LinkedIn profil]({linkedin_url})"
+                "\n\n"
+                "🙏 Na LinkedIn zatím zpětnou vazbu dávat neumím, ale třeba pomůže někdo jiný"
+                "\n\n"
+                "💡 Přidej se do [naší LinkedIn skupiny](https://www.linkedin.com/groups/13988090/). "
+                "Můžeš se pak snadno propojit s ostatními členy a oni s tebou. "
+                "Zároveň se ti bude logo junior.guru zobrazovat na profilu v sekci „zájmy”. "
+                "Nevíme, jestli ti to přidá nějaký kredit u recruiterů, ale vyloučeno to není!"
             ),
             suppress=True,
         )
+        await add_members_with_role(thread, REVIEWER_ROLE_ID)
 
-    tags = prepare_tags(thread, github=bool(github_url), linkedin=bool(linkedin_url))
-    await thread.edit(applied_tags=tags)
+    await thread.edit(
+        applied_tags=prepare_tags(
+            thread,
+            cv=bool(cv_url),
+            github=bool(github_url),
+            linkedin=bool(linkedin_url),
+        )
+    )
 
     if not github_url and not linkedin_url:
         await starting_message.reply(
@@ -233,5 +268,3 @@ async def handle_review_thread(
             "Pokud nějaký máš a chceš jej zkontrolovat, přidej sem zprávu, "
             "ve které mě označíš a bude v ní odkaz na ten profil."
         )
-
-    # await add_members_with_role(thread, REVIEWER_ROLE_ID)
