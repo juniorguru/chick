@@ -1,9 +1,9 @@
 import os
 import re
-from typing import Any, Generator
+from typing import Any, Generator, TypedDict
 from urllib.parse import quote, unquote
 
-from discord import Color, Embed
+from discord import Color, Embed, ForumTag, Thread
 from jg.hen.core import ResultType, Summary
 
 
@@ -37,6 +37,23 @@ def find_linkedin_url(text: str) -> str | None:
         username = quote(unquote(match.group("username")))
         return f"https://www.linkedin.com/in/{username}/"
     return ""
+
+
+def prepare_tags(
+    thread: Thread,
+    cv: bool = False,
+    github: bool = False,
+    linkedin: bool = False,
+) -> list[ForumTag]:
+    available_tags = {tag.name: tag for tag in thread.parent.available_tags}
+    applied_tags = set(thread.applied_tags)
+    if cv:
+        applied_tags.add(available_tags.pop("zpětná vazba na CV"))
+    if github:
+        applied_tags.add(available_tags.pop("zpětná vazba na GH"))
+    if linkedin:
+        applied_tags.add(available_tags.pop("zpětná vazba na LI"))
+    return list(applied_tags)
 
 
 def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:

@@ -17,6 +17,7 @@ from jg.chick.lib.reviews import (
     find_github_url,
     find_linkedin_url,
     format_summary,
+    prepare_tags,
 )
 from jg.chick.lib.threads import (
     add_members_with_role,
@@ -204,12 +205,13 @@ async def handle_review_thread(
             f"<:github:842685206095724554> Zavětřilo jsem GitHub profil {github_url}, jdu se v tom pohrabat…",
             suppress=True,
         )
-        logger.debug(f"{'Using' if GITHUB_API_KEY else 'Not using'} GitHub API key")
-        summary = await check_profile_url(github_url, github_api_key=GITHUB_API_KEY)
-        logger.info(f"Done reviewing {github_url}: {summary.status}")
-        for message in format_summary(summary):
-            await thread.send(**message)
-        await thread.send("✨ Hotovo!")
+        async with thread.typing():
+            logger.debug(f"{'Using' if GITHUB_API_KEY else 'Not using'} GitHub API key")
+            summary = await check_profile_url(github_url, github_api_key=GITHUB_API_KEY)
+            logger.info(f"Done reviewing {github_url}: {summary.status}")
+            for message in format_summary(summary):
+                await thread.send(**message)
+            await thread.send("✨ Hotovo!")
 
     if linkedin_url := find_linkedin_url(starting_message.content):
         logger.info(f"Found {linkedin_url} in {thread.name!r}, reviewing…")
@@ -222,7 +224,10 @@ async def handle_review_thread(
             suppress=True,
         )
 
-    if not (github_url or linkedin_url):
+    tags = prepare_tags(thread, github=bool(github_url), linkedin=bool(linkedin_url))
+    await thread.edit(applied_tags=tags)
+
+    if not github_url and not linkedin_url:
         await starting_message.reply(
             "Nenašlo jsem žádný GitHub ani LinkedIn profil. "
             "Pokud nějaký máš a chceš jej zkontrolovat, přidej sem zprávu, "
