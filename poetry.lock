@@ -1162,13 +1162,13 @@ testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)"]
 
 [[package]]
 name = "pytest-ruff"
-version = "0.3.1"
+version = "0.3.2"
 description = "pytest plugin to check ruff requirements."
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "pytest_ruff-0.3.1-py3-none-any.whl", hash = "sha256:008556576fb1bda93a432ad381432bfd5575cc94627d22bfdece46561b8e4f7f"},
-    {file = "pytest_ruff-0.3.1.tar.gz", hash = "sha256:c9f7392a3384af73a6a72741a4035a605480a7a8e7a4bd8da05a98e6664cffb5"},
+    {file = "pytest_ruff-0.3.2-py3-none-any.whl", hash = "sha256:5096578df2240b2a99f7376747bc433ce25e590c7d570d5c2b47f725497f2c10"},
+    {file = "pytest_ruff-0.3.2.tar.gz", hash = "sha256:8d82882969e52b664a7cef4465cba63e45173f38d907dffeca41d9672f59b6c6"},
 ]
 
 [package.dependencies]
@@ -1329,4 +1329,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "af6fbe2729e78e506f43d71084f22df1239b6b4b2c9277f32c609dcfab93ddb5"
+content-hash = "132d285e7eedcaee8aa280a26f73ccb31f794cf0c570dfd9d5f1f9a6202710dd"
