@@ -660,7 +660,7 @@ pillow = "10.3.0"
 type = "git"
 url = "https://github.com/juniorguru/hen.git"
 reference = "HEAD"
-resolved_reference = "89407f17a38f063bfaaaaf9ad81e8eb96134b3bc"
+resolved_reference = "9952813c9f28b9ba43e5a143c765802836dde0a6"
 
 [[package]]
 name = "lxml"
