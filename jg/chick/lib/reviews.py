@@ -4,7 +4,7 @@ from typing import Any, Generator
 from urllib.parse import quote, unquote
 
 from discord import Attachment, Color, Embed, ForumTag, Thread
-from jg.hen.core import ResultType, Summary
+from jg.hen.core import Status, Summary
 
 
 MAINTAINER_ID = 668226181769986078
@@ -18,10 +18,10 @@ GITHUB_URL_RE = re.compile(r"github\.com/(?P<username>[\w-]+)")
 LINKEDIN_URL_RE = re.compile(r"linkedin\.com/in/(?P<username>[^\s\/]+)")
 
 COLORS = {
-    ResultType.ERROR: Color.red(),
-    ResultType.WARNING: Color.orange(),
-    ResultType.INFO: Color.blue(),
-    ResultType.DONE: Color.green(),
+    Status.ERROR: Color.red(),
+    Status.WARNING: Color.orange(),
+    Status.INFO: Color.blue(),
+    Status.DONE: Color.green(),
 }
 
 
@@ -64,7 +64,7 @@ def prepare_tags(
 
 
 def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
-    if summary.status == "error":
+    if summary.error:
         yield dict(
             content=(
                 f"🔬 Kouklo jsem na ten GitHub, ale bohužel to skončilo chybou 🤕\n"
@@ -75,9 +75,9 @@ def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
         )
     else:
         yield dict(content="🔬 Tak jsem kouklo na ten GitHub.")
-        for result in summary.results:
+        for outcome in summary.outcomes:
             embed = Embed(
-                color=COLORS[result.type],
-                description=f"{result.message}\n\nℹ️ [Vysvětlení]({result.docs_url})",
+                color=COLORS[outcome.status],
+                description=f"{outcome.message}\n\nℹ️ [Vysvětlení]({outcome.docs_url})",
             )
             yield dict(embed=embed)
