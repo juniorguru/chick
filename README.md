@@ -75,3 +75,6 @@ If you insist to deploy manually from your local machine, follow these steps:
 -   Run `flyctl deploy` if not deployed already.
 
 _Inspired by [Hosting a Python Discord Bot for Free with Fly.io](https://jonahlawrence.hashnode.dev/hosting-a-python-discord-bot-for-free-with-flyio) by Jonah Lawrence._
+
+## License
+[AGPL-3.0-only](LICENSE), copyright (c) 2024 Jan Javorek, and contributors.
