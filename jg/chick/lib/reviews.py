@@ -4,7 +4,7 @@ from typing import Any, Generator
 from urllib.parse import quote, unquote
 
 from discord import Attachment, Color, Embed, ForumTag, Thread
-from jg.hen.core import Status, Summary
+from jg.hen.models import Status, Summary
 
 
 MAINTAINER_ID = 668226181769986078
