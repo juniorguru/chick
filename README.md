@@ -48,8 +48,7 @@ Running locally:
 
 Useful commands:
 
--   To temporarily turn off production, run `flyctl machine stop`.
-    To bring it back, run `flyctl machine start`.
+-   Run `poetry run chick --prod` to temporarily replace the production instance with the local one if you need to test something.
 -   To test, run `pytest`.
 -   To format code, run `ruff format`.
 -   To organize imports and fix other issues, run `ruff check --fix`.
