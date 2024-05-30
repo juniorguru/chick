@@ -230,7 +230,9 @@ async def handle_review_thread(
         async with thread.typing():
             logger.debug(f"{'Using' if GITHUB_API_KEY else 'Not using'} GitHub API key")
             summary = await check_profile_url(github_url, github_api_key=GITHUB_API_KEY)
-            logger.info(f"Done reviewing {github_url}: {summary.status}")
+            logger.info(
+                f"Done reviewing {github_url}: {'ERROR' if summary.error else 'OK'}"
+            )
             for message in format_summary(summary):
                 await thread.send(**message)
             await thread.send("✨ Hotovo!")
