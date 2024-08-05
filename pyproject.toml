@@ -15,7 +15,7 @@ chick = "jg.chick.main:main"
 [tool.poetry.dependencies]
 python = "~3.11"
 py-cord = {version = "2.6.0", extras = ["speed"]}
-aiohttp = "3.10.0"
+aiohttp = "3.10.1"
 "jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
 click = "8.1.7"
 
