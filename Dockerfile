@@ -1,4 +1,4 @@
-FROM python:3.11-slim-buster
+FROM python:3.12-slim-buster
 RUN python -m pip install -U pip poetry
 ENV PORT 8080
 RUN mkdir /app
