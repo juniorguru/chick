@@ -15,7 +15,7 @@ chick = "jg.chick.main:main"
 [tool.poetry.dependencies]
 python = "~3.12"
 py-cord = {version = "2.6.1", extras = ["speed"]}
-aiohttp = "3.11.2"
+aiohttp = "3.11.7"
 "jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
 click = "8.1.7"
 
@@ -23,7 +23,7 @@ click = "8.1.7"
 pytest = "8.3.3"
 pytest-asyncio = "0.24.0"
 pytest-ruff = "0.4.1"
-ruff = "0.7.*"
+ruff = "0.8.*"
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"
