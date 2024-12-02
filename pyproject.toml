@@ -15,12 +15,12 @@ chick = "jg.chick.main:main"
 [tool.poetry.dependencies]
 python = "~3.12"
 py-cord = {version = "2.6.1", extras = ["speed"]}
-aiohttp = "3.11.7"
+aiohttp = "3.11.9"
 "jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
 click = "8.1.7"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "8.3.3"
+pytest = "8.3.4"
 pytest-asyncio = "0.24.0"
 pytest-ruff = "0.4.1"
 ruff = "0.8.*"
