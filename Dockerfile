@@ -1,5 +1,5 @@
 FROM python:3.12-slim-bookworm
-RUN python -m pip install -U pip poetry
+RUN python -m pip install -U pip poetry@1.x.x
 ENV PORT 8080
 RUN mkdir /app
 WORKDIR /app
