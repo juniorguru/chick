@@ -21,9 +21,9 @@ click = "8.1.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "8.3.4"
-pytest-asyncio = "0.25.1"
+pytest-asyncio = "0.25.2"
 pytest-ruff = "0.4.1"
-ruff = "0.8.*"
+ruff = "0.9.*"
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"
