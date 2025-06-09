@@ -39,7 +39,6 @@ async def run(host, port, discord_api_key) -> None:
     help="Show debug logs.",
 )
 @click.option(
-    "-p",
     "--prod",
     "production",
     default=False,
