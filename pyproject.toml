@@ -29,9 +29,6 @@ ruff = "0.11.*"
 python_files = "test_*.py"
 testpaths = "."
 addopts = "--ff --ruff --ruff-format"
-filterwarnings = [
-    "ignore:'audioop' is deprecated:DeprecationWarning",  # py-cord
-]
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
