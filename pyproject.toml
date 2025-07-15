@@ -15,7 +15,7 @@ chick = "jg.chick.main:main"
 [tool.poetry.dependencies]
 python = "~3.12"
 py-cord = { git = "https://github.com/Pycord-Development/pycord.git", extras = ["speed"] }  # see also Dockerfile!
-aiohttp = "3.12.13"
+aiohttp = "3.12.14"
 "jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
 click = "8.2.1"
 
