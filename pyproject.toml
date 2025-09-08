@@ -20,7 +20,7 @@ aiohttp = "3.12.15"
 click = "8.2.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "8.4.1"
+pytest = "8.4.2"
 pytest-asyncio = "1.1.0"
 pytest-ruff = "0.5"
 ruff = "0.12.*"
