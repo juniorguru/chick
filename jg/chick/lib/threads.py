@@ -79,9 +79,5 @@ async def ensure_thread_name(thread: discord.Thread, name_template) -> str | Non
 
 async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
     """Adds members of given role to given thread"""
-    message = await thread.send(
-        f"<@&{role_id}>",
-        silent=True,
-        allowed_mentions=discord.AllowedMentions.none(),
-    )
+    message = await thread.send(f"<@&{role_id}>", silent=True)
     await message.delete()
