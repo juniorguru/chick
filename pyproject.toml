@@ -24,7 +24,7 @@ pydantic = "2.11.10"
 pytest = "8.4.2"
 pytest-asyncio = "1.2.0"
 pytest-ruff = "0.5"
-ruff = "0.13.*"
+ruff = "0.14.*"
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"
