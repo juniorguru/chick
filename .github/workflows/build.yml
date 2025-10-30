@@ -8,6 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
     - uses: astral-sh/setup-uv@v7
+    - run: uv run sync
     - run: uv run pytest
     - if: ${{ github.ref == 'refs/heads/main' }}
       uses: superfly/flyctl-actions/setup-flyctl@master
