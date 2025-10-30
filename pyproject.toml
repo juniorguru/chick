@@ -31,12 +31,12 @@ dev = [
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"
-testpaths = "."
-addopts = "--ff --ruff --ruff-format"
+testpaths = "tests"
+addopts = "--import-mode=importlib --ff --ruff --ruff-format"
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.lint]
 extend-select = ["I"]
