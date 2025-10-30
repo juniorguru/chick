@@ -7,13 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
-    - run: pipx install poetry==1.8.5
-    - uses: actions/setup-python@v6
-      with:
-        python-version-file: pyproject.toml
-        cache: poetry
-    - run: poetry install
-    - run: poetry run pytest
+    - uses: astral-sh/setup-uv@v7
+    - run: uv run pytest
     - if: ${{ github.ref == 'refs/heads/main' }}
       uses: superfly/flyctl-actions/setup-flyctl@master
     - if: ${{ github.ref == 'refs/heads/main' }}

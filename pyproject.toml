@@ -1,30 +1,33 @@
-[tool.poetry]
+[project]
 name = "jg.chick"
-version = "0.0"
+version = "0.0.1"
 description = "A real-time, synchronous junior.guru Discord bot"
-authors = ["Honza Javorek <honza@junior.guru>"]
-license = "AGPL-3.0-only"
 readme = "README.md"
+authors = [{name = "Honza Javorek", email = "honza@junior.guru"}]
+license = {text = "AGPL-3.0-only"}
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "aiohttp>=3.13.1",
+    "click>=8.3.0",
+    "jg.hen@git+https://github.com/juniorguru/hen.git",
+    "py-cord[speed]@git+https://github.com/Pycord-Development/pycord.git",  # see also Dockerfile!
+    "pydantic>=2.12.3",
+]
+
+[project.urls]
 homepage = "https://junior.guru/"
 repository = "https://github.com/juniorguru/chick/"
-packages = [{ include = "jg" }]
 
-[tool.poetry.scripts]
+[project.scripts]
 chick = "jg.chick.main:main"
 
-[tool.poetry.dependencies]
-python = "~3.12"
-py-cord = { git = "https://github.com/Pycord-Development/pycord.git", extras = ["speed"] }  # see also Dockerfile!
-aiohttp = ">=3.13.1"
-"jg.hen" = { git = "https://github.com/juniorguru/hen.git" }
-click = ">=8.3.0"
-pydantic = ">=2.12.3"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "8.4.2"
-pytest-asyncio = "1.2.0"
-pytest-ruff = "0.5"
-ruff = "0.14.*"
+[dependency-groups]
+dev = [
+    "pytest-asyncio>=1.2.0",
+    "pytest-ruff>=0.5",
+    "pytest>=8.4.2",
+    "ruff>=0.14.0",
+]
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"
@@ -44,5 +47,8 @@ lines-after-imports = 2
 known-third-party = ["jg.hen"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.8.11,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "jg.chick"

@@ -31,10 +31,10 @@ The original, asynchronous bot installs and uses this codebase to run the same c
 
 ## Installation
 
-1.  You'll need [poetry](https://python-poetry.org/) installed.
+1.  You'll need [uv](https://docs.astral.sh/uv/) installed.
 2.  Clone this repository: `git clone git@github.com:juniorguru/chick.git`
 3.  Go to the project directory: `cd chick`
-4.  Install the project: `poetry install`
+4.  Install the project: `uv sync`
 
 ## Development
 
@@ -43,17 +43,17 @@ Running locally:
 -   Set the `DISCORD_API_KEY` environment variable to your Discord bot token.
     Set the `GITHUB_API_KEY` environment variable to your GitHub API token.
     Using [direnv](https://direnv.net/) might help setting environment variables automatically in your shell when you navigate to the project directory.
--   Run `poetry run chick` to start the bot.
+-   Run `uv run chick` to start the bot.
 -   Press <kbd>Ctrl+C</kbd> to stop the bot.
 
 Useful commands:
 
--   Run `poetry run chick --prod` to temporarily replace the production instance with the local one if you need to test something.
--   To test, run `pytest`.
--   To format code, run `ruff format`.
--   To organize imports and fix other issues, run `ruff check --fix`.
+-   Run `uv run chick --prod` to temporarily replace the production instance with the local one if you need to test something.
+-   To test, run `uv run pytest`.
+-   To format code, run `uv run ruff format`.
+-   To organize imports and fix other issues, run `uv run ruff check --fix`.
 
-## Inviting to servers
+## Inviting the bot to servers
 
 Click the [install link](https://discord.com/oauth2/authorize?client_id=797097976571887687&permissions=8&integration_type=0&scope=bot+applications.commands). For simplicity, the bot installs as an admin.
 
