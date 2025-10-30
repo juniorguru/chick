@@ -6,13 +6,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - uses: astral-sh/setup-uv@v7
-    - run: uv run sync
-    - run: uv run pytest
-    - if: ${{ github.ref == 'refs/heads/main' }}
-      uses: superfly/flyctl-actions/setup-flyctl@master
-    - if: ${{ github.ref == 'refs/heads/main' }}
-      run: flyctl deploy
-      env:
-        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Test
+        run: uv run pytest
+
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        run: flyctl deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
