@@ -1,10 +1,10 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from aiohttp.web import Application, Request, Response, RouteTableDef, json_response
 
 
-LAUNCH_AT = datetime.utcnow()
+LAUNCH_AT = datetime.now(UTC)
 
 
 logger = logging.getLogger("jg.chick.web")
@@ -21,7 +21,7 @@ async def index(request: Request) -> Response:
         {
             "status": "ok",
             "launch_at": LAUNCH_AT.isoformat(),
-            "uptime_sec": (datetime.utcnow() - LAUNCH_AT).seconds,
+            "uptime_sec": (datetime.now(UTC) - LAUNCH_AT).seconds,
         }
     )
 

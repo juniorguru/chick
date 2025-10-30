@@ -78,6 +78,13 @@ async def on_message(message: discord.Message):
     return await on_regular_message(bot.user, channel, message)
 
 
+@bot.slash_command(description="Nápověda k použití kuřete")
+async def help(context: discord.ApplicationContext):
+    await context.respond(
+        "Píp píp píp! Všechno se dovíš v [dokumentaci na webu](https://junior.guru/about/bot/) 📖"
+    )
+
+
 async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message):
     try:
         response = (

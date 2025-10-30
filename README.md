@@ -53,6 +53,10 @@ Useful commands:
 -   To format code, run `ruff format`.
 -   To organize imports and fix other issues, run `ruff check --fix`.
 
+## Inviting to servers
+
+Click the [install link](https://discord.com/oauth2/authorize?client_id=797097976571887687&permissions=8&integration_type=0&scope=bot+applications.commands). For simplicity, the bot installs as an admin.
+
 ## Deployment
 
 The bot is deployed to [fly.io](https://fly.io/).
