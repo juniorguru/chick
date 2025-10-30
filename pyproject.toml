@@ -10,7 +10,7 @@ dependencies = [
     "aiohttp>=3.13.1",
     "click>=8.3.0",
     "jg.hen@git+https://github.com/juniorguru/hen.git",
-    "py-cord[speed]@git+https://github.com/Pycord-Development/pycord.git",  # see also Dockerfile!
+    "py-cord[speed]@git+https://github.com/Pycord-Development/pycord.git",
     "pydantic>=2.12.3",
 ]
 
