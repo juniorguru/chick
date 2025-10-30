@@ -130,7 +130,7 @@ dmypy.json
 .pyre/
 
 # Library
-!jg/chick/lib/
+!**/chick/lib/
 
 # Ruff
 .ruff_cache
