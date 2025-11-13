@@ -64,7 +64,9 @@ def prepare_tags(
     return list(applied_tags)
 
 
-def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
+def format_summary(
+    summary: Summary, has_profile: bool
+) -> Generator[dict[str, Any], None, None]:
     if summary.error:
         yield dict(
             content=(
@@ -88,13 +90,21 @@ def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
         yield dict(
             content="Nevidím žádné zásadní nedostatky! Hledej si práci v oboru! 💪",
         )
-        yield dict(
-            content=(
-                "Udělej Pull Request na [github.com/juniorguru/eggtray](https://github.com/juniorguru/eggtray) "
-                "a vytvoř si profil na [junior.guru/candidates](https://junior.guru/candidates/)! 🚀"
-            ),
-            suppress=True,
-        )
+        if has_profile:
+            yield dict(
+                content=(
+                    "Profil na [junior.guru/candidates](https://junior.guru/candidates/) už máš, výborně! 🚀"
+                ),
+                suppress=True,
+            )
+        else:
+            yield dict(
+                content=(
+                    "Udělej Pull Request na [github.com/juniorguru/eggtray](https://github.com/juniorguru/eggtray) "
+                    "a vytvoř si profil na [junior.guru/candidates](https://junior.guru/candidates/)! 🚀"
+                ),
+                suppress=True,
+            )
     else:
         yield dict(
             content=(

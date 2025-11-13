@@ -2,6 +2,7 @@ import asyncio
 import logging
 from typing import cast
 
+import aiohttp
 import discord
 from discord.ext import commands
 from jg.hen.core import check_profile_url
@@ -28,6 +29,9 @@ from jg.chick.lib.threads import (
     is_thread_created,
     name_thread,
 )
+
+
+EGGTRAY_API_URL = "https://juniorguru.github.io/eggtray/profiles.json"
 
 
 logger = logging.getLogger("jg.chick.bot")
@@ -243,13 +247,26 @@ async def handle_review_thread(
             ),
             suppress=True,
         )
+        logger.info("Checking profiles API…")
+        profiles = []
+        async with aiohttp.ClientSession() as session:
+            async with session.get(EGGTRAY_API_URL) as resp:
+                if resp.status == 200:
+                    profiles = (await resp.json())["items"]
+                    logger.info(f"Found {len(profiles)} profiles")
+
         async with thread.typing():
             logger.debug(f"{'Using' if GITHUB_API_KEY else 'Not using'} GitHub API key")
             summary = await check_profile_url(github_url, github_api_key=GITHUB_API_KEY)
             logger.info(
                 f"Done reviewing {github_url}: {'ERROR' if summary.error else 'OK'}"
             )
-            for message in format_summary(summary):
+            has_profile = any(
+                profile["github_username"] == summary.github_username
+                for profile in profiles
+            )
+            logger.info(f"User has profile: {has_profile}")
+            for message in format_summary(summary, has_profile):
                 await thread.send(**message)
 
     if linkedin_url := find_linkedin_url(starting_message.content):
