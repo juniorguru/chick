@@ -9,6 +9,7 @@ requires-python = ">=3.13,<3.14"
 dependencies = [
     "aiohttp>=3.13.1",
     "click>=8.3.0",
+    "jg.eggtray@git+https://github.com/juniorguru/eggtray.git",
     "jg.hen@git+https://github.com/juniorguru/hen.git",
     "py-cord[speed]@git+https://github.com/Pycord-Development/pycord.git",
     "pydantic>=2.12.3",
@@ -44,7 +45,7 @@ extend-select = ["I"]
 [tool.ruff.lint.isort]
 combine-as-imports = true
 lines-after-imports = 2
-known-third-party = ["jg.hen"]
+known-third-party = ["jg.eggtray", "jg.hen"]
 
 [build-system]
 requires = ["uv_build>=0.8.11,<0.10.0"]
