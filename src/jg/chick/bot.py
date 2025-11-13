@@ -85,8 +85,8 @@ async def help(context: discord.ApplicationContext):
     )
 
 
-@bot.slash_command(description="Nápověda k použití kuřete")
-async def discord_id(context: discord.ApplicationContext):
+@bot.slash_command(description="Jaké je tvoje Discord ID?")
+async def discordid(context: discord.ApplicationContext):
     await context.respond(
         f"Tvoje Discord ID je `{context.author.id}`. "
         "Až si budeš zakládat profil v [seznamu kandidátů](https://junior.guru/candidates/), "
