@@ -262,8 +262,7 @@ async def handle_review_thread(
                 f"Done reviewing {github_url}: {'ERROR' if summary.error else 'OK'}"
             )
             has_profile = any(
-                profile["github_username"] == summary.github_username
-                for profile in profiles
+                profile["github_username"] == summary.username for profile in profiles
             )
             logger.info(f"User has profile: {has_profile}")
             for message in format_summary(summary, has_profile):
