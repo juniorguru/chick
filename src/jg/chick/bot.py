@@ -85,6 +85,15 @@ async def help(context: discord.ApplicationContext):
     )
 
 
+@bot.slash_command(description="Nápověda k použití kuřete")
+async def discord_id(context: discord.ApplicationContext):
+    await context.respond(
+        f"Tvoje Discord ID je `{context.author.id}`. "
+        "Až si budeš zakládat profil v [seznamu kandidátů](https://junior.guru/candidates/), "
+        "bude se ti tahle informace hodit <a:awkward:985064290044223488>"
+    )
+
+
 async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message):
     try:
         response = (
@@ -240,9 +249,8 @@ async def handle_review_thread(
             logger.info(
                 f"Done reviewing {github_url}: {'ERROR' if summary.error else 'OK'}"
             )
-            for message in format_summary(summary):
+            for message in format_summary(summary, starting_message.author.id):
                 await thread.send(**message)
-            await thread.send("✨ Hotovo!")
 
     if linkedin_url := find_linkedin_url(starting_message.content):
         logger.info(f"Found {linkedin_url} in {thread.name!r}, reviewing…")

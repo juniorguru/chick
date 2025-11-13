@@ -4,6 +4,7 @@ from typing import Any, Generator
 from urllib.parse import quote, unquote
 
 from discord import Attachment, Color, Embed, ForumTag, Thread
+from jg.eggtray.models import is_ready
 from jg.hen.models import Status, Summary
 
 
@@ -63,7 +64,9 @@ def prepare_tags(
     return list(applied_tags)
 
 
-def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
+def format_summary(
+    summary: Summary, discord_id: int
+) -> Generator[dict[str, Any], None, None]:
     if summary.error:
         yield dict(
             content=(
@@ -73,11 +76,29 @@ def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
             ),
             suppress=True,
         )
+        return
+
+    yield dict(content="🔬 Tak jsem kouklo na ten GitHub.")
+    for outcome in summary.outcomes:
+        embed = Embed(
+            color=COLORS[outcome.status],
+            description=f"{outcome.message}\n\nℹ️ [Vysvětlení]({outcome.docs_url})",
+        )
+        yield dict(embed=embed)
+    if is_ready(summary.outcomes):
+        yield dict(
+            content=(
+                "Hotovo! ✨ Nevidím žádné zásadní nedostatky! Hledej si práci v oboru! 💪"
+                "Až si budeš vytvářet profil na [junior.guru/candidates](https://junior.guru/candidates/), "
+                f"bude se ti hodit vědět, že tvoje Discord ID je `{discord_id}` 🚀"
+            ),
+            suppress=True,
+        )
     else:
-        yield dict(content="🔬 Tak jsem kouklo na ten GitHub.")
-        for outcome in summary.outcomes:
-            embed = Embed(
-                color=COLORS[outcome.status],
-                description=f"{outcome.message}\n\nℹ️ [Vysvětlení]({outcome.docs_url})",
-            )
-            yield dict(embed=embed)
+        yield dict(
+            content=(
+                "Hotovo! ✨ Vidím zásadní nedostatky 🔴 Oprav si to, než si začneš hledat práci. Klidně si to tady pak znovu nech zkontrolovat. "
+                "Až to bude OK, nezapomeň si vytvořit profil na [junior.guru/candidates](https://junior.guru/candidates/)!\n\n"
+            ),
+            suppress=True,
+        )
