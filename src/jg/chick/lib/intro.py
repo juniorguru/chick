@@ -157,13 +157,10 @@ def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
     )
     gh_connection_snippet = (
         "\n\n"
-        "Vidím, že máš **profil na GitHubu**. Když si GitHub propojíš s Discordem, bude tvůj profil viditelnější. Do budoucna navíc chystáme pro lidi s propojeným GitHub profilem spoustu vychytávek <a:yayfrog:976193164471853097> "
-        "\n\n"
-        "1. Jdi do [nastavení](https://discord.com/channels/@me) "
-        "\n"
-        "2. Klikni na Propojení (_Connections_). "
-        "\n"
-        "3. Přidej GitHub. "
+        "Vidím, že máš **profil na GitHubu**. "
+        "Hoď ho do <#1123527619716055040> a dám ti na něj zpětnou vazbu. "
+        "Možná si už můžeš hledat práci přes [junior.guru/candidates](https://junior.guru/candidates/)?"
+        "<a:awkward:985064290044223488>"
     )
     footer = (
         "\n\n"
@@ -186,9 +183,9 @@ def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
             style=ButtonStyle.secondary,
         ),
         ui.Button(
-            emoji="🧑‍🏫",
-            label="Kurzy",
-            url="https://junior.guru/courses/",
+            emoji="💌",
+            label="Newsletter",
+            url="https://junior.guru/news/",
             style=ButtonStyle.secondary,
         ),
     )
