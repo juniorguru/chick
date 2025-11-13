@@ -88,7 +88,7 @@ def format_summary(
     yield dict(content="Hotovo! ✨")
     if is_ready(summary.outcomes):
         yield dict(
-            content="Nevidím žádné zásadní nedostatky! Hledej si práci v oboru! 💪",
+            content="Nevidím žádné zásadní nedostatky! Hledej si práci v oboru! 💪"
         )
         if has_profile:
             yield dict(
