@@ -64,9 +64,7 @@ def prepare_tags(
     return list(applied_tags)
 
 
-def format_summary(
-    summary: Summary, discord_id: int
-) -> Generator[dict[str, Any], None, None]:
+def format_summary(summary: Summary) -> Generator[dict[str, Any], None, None]:
     if summary.error:
         yield dict(
             content=(
@@ -85,20 +83,22 @@ def format_summary(
             description=f"{outcome.message}\n\nℹ️ [Vysvětlení]({outcome.docs_url})",
         )
         yield dict(embed=embed)
+    yield dict(content="Hotovo! ✨")
     if is_ready(summary.outcomes):
         yield dict(
+            content="Nevidím žádné zásadní nedostatky! Hledej si práci v oboru! 💪",
+        )
+        yield dict(
             content=(
-                "Hotovo! ✨ Nevidím žádné zásadní nedostatky! Hledej si práci v oboru! 💪"
-                "Až si budeš vytvářet profil na [junior.guru/candidates](https://junior.guru/candidates/), "
-                f"bude se ti hodit vědět, že tvoje Discord ID je `{discord_id}` 🚀"
+                "Udělej Pull Request na [github.com/juniorguru/eggtray](https://github.com/juniorguru/eggtray) "
+                "a vytvoř si profil na [junior.guru/candidates](https://junior.guru/candidates/)! 🚀"
             ),
             suppress=True,
         )
     else:
         yield dict(
             content=(
-                "Hotovo! ✨ Vidím zásadní nedostatky 🔴 Oprav si to, než si začneš hledat práci. Klidně si to tady pak znovu nech zkontrolovat. "
-                "Až to bude OK, nezapomeň si vytvořit profil na [junior.guru/candidates](https://junior.guru/candidates/)!\n\n"
+                "Vidím zásadní nedostatky 🔴 Oprav si to, než si začneš hledat práci. "
+                "Až uděláš změny, stačí mě označit v tomto vlákně a projedu to znova 🔬"
             ),
-            suppress=True,
         )

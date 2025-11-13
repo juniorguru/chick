@@ -249,7 +249,7 @@ async def handle_review_thread(
             logger.info(
                 f"Done reviewing {github_url}: {'ERROR' if summary.error else 'OK'}"
             )
-            for message in format_summary(summary, starting_message.author.id):
+            for message in format_summary(summary):
                 await thread.send(**message)
 
     if linkedin_url := find_linkedin_url(starting_message.content):
