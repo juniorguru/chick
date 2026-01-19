@@ -74,7 +74,7 @@ async def on_ready():
         refresh_interests_task.start()
 
 
-@tasks.loop(seconds=INTERESTS_REFRESH_INTERVAL.total_seconds())
+@tasks.loop(seconds=int(INTERESTS_REFRESH_INTERVAL.total_seconds()))
 async def refresh_interests_task():
     """Background task to periodically refresh interests data."""
     if interests_manager.should_refresh():
@@ -149,14 +149,13 @@ async def on_thread_message(
     message: discord.Message,
 ):
     # Check if this is an interest thread
-    if interests_manager.is_tracking_thread(thread.id):
-        role_id = interests_manager.get_role_for_thread(thread.id)
-        if role_id and interests_manager.can_notify_role(role_id):
-            logger.info(
-                f"New message in interest thread {thread.name!r}, adding role {role_id} members"
-            )
-            await add_members_with_role(thread, role_id)
-            interests_manager.mark_role_notified(role_id)
+    role_id = interests_manager.get_role_for_thread(thread.id)
+    if role_id and interests_manager.can_notify_role(role_id):
+        logger.info(
+            f"New message in interest thread {thread.name!r}, adding role {role_id} members"
+        )
+        await add_members_with_role(thread, role_id)
+        interests_manager.mark_role_notified(role_id)
 
     if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
         logger.info("Noticed mention in #cv-github-linkedin, starting review")

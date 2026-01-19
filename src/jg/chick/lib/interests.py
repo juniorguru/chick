@@ -109,7 +109,7 @@ class InterestsManager:
         return thread_id in self.thread_to_role
 
 
-async def report_api_error(bot: discord.Bot, error_message: str):
+async def report_api_error(bot: discord.Client, error_message: str):
     """Reports an API error to the designated error channel."""
     try:
         channel = bot.get_channel(ERROR_REPORT_CHANNEL_ID)
