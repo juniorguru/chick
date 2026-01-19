@@ -4,9 +4,14 @@ from typing import cast
 
 import aiohttp
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from jg.hen.core import check_profile_url
 
+from jg.chick.lib.interests import (
+    INTERESTS_REFRESH_INTERVAL,
+    InterestsManager,
+    report_api_error,
+)
 from jg.chick.lib.intro import (
     GREETER_ROLE_ID,
     THREAD_NAME_TEMPLATE as INTRO_THREAD_NAME_TEMPLATE,
@@ -47,11 +52,37 @@ intents = discord.Intents(
 
 bot = commands.Bot(intents=intents)
 
+# Initialize interests manager
+interests_manager = InterestsManager()
+
 
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
+
+    # Fetch interests on startup
+    logger.info("Fetching interests on startup")
+    if not await interests_manager.fetch_interests():
+        await report_api_error(
+            bot,
+            "Failed to fetch interests data on startup. The bot will retry periodically.",
+        )
+
+    # Start background task for periodic refresh
+    if not refresh_interests_task.is_running():
+        refresh_interests_task.start()
+
+
+@tasks.loop(seconds=INTERESTS_REFRESH_INTERVAL.total_seconds())
+async def refresh_interests_task():
+    """Background task to periodically refresh interests data."""
+    if interests_manager.should_refresh():
+        logger.info("Refreshing interests data")
+        if not await interests_manager.fetch_interests():
+            await report_api_error(
+                bot, "Failed to refresh interests data. Will retry on next cycle."
+            )
 
 
 @bot.event
@@ -117,6 +148,16 @@ async def on_thread_message(
     thread: discord.Thread,
     message: discord.Message,
 ):
+    # Check if this is an interest thread
+    if interests_manager.is_tracking_thread(thread.id):
+        role_id = interests_manager.get_role_for_thread(thread.id)
+        if role_id and interests_manager.can_notify_role(role_id):
+            logger.info(
+                f"New message in interest thread {thread.name!r}, adding role {role_id} members"
+            )
+            await add_members_with_role(thread, role_id)
+            interests_manager.mark_role_notified(role_id)
+
     if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
         logger.info("Noticed mention in #cv-github-linkedin, starting review")
         starting_message = (await fetch_starting_message(thread)) or message
