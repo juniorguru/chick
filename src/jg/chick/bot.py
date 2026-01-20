@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import datetime
 from typing import cast
 
 import aiohttp
@@ -8,7 +9,7 @@ from discord.ext import commands, tasks
 from jg.hen.core import check_profile_url
 
 from jg.chick.lib.interests import (
-    INTERESTS_REFRESH_INTERVAL,
+    INTERESTS_API_URL,
     InterestsManager,
     report_api_error,
 )
@@ -56,6 +57,31 @@ bot = commands.Bot(intents=intents)
 interests_manager = InterestsManager()
 
 
+async def fetch_interests_from_api() -> bool:
+    """
+    Fetches interests data from the API and updates the manager.
+
+    This is the "imperative shell" - contains I/O operations.
+
+    Returns:
+        True if successful, False otherwise.
+    """
+    try:
+        logger.info(f"Fetching interests from {INTERESTS_API_URL}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(INTERESTS_API_URL) as resp:
+                if resp.status == 200:
+                    interests = await resp.json()
+                    interests_manager.update_interests(interests, datetime.now())
+                    return True
+                else:
+                    logger.error(f"Failed to fetch interests: HTTP {resp.status}")
+                    return False
+    except Exception as e:
+        logger.exception(f"Error fetching interests: {e}")
+        return False
+
+
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
@@ -63,7 +89,7 @@ async def on_ready():
 
     # Fetch interests on startup
     logger.info("Fetching interests on startup")
-    if not await interests_manager.fetch_interests():
+    if not await fetch_interests_from_api():
         await report_api_error(
             bot,
             "Failed to fetch interests data on startup. The bot will retry periodically.",
@@ -74,12 +100,16 @@ async def on_ready():
         refresh_interests_task.start()
 
 
-@tasks.loop(seconds=int(INTERESTS_REFRESH_INTERVAL.total_seconds()))
+@tasks.loop(hours=1)
 async def refresh_interests_task():
-    """Background task to periodically refresh interests data."""
-    if interests_manager.should_refresh():
+    """
+    Background task to periodically check and refresh interests data.
+
+    Runs every hour but only refreshes if data is older than INTERESTS_REFRESH_INTERVAL.
+    """
+    if interests_manager.should_refresh_now():
         logger.info("Refreshing interests data")
-        if not await interests_manager.fetch_interests():
+        if not await fetch_interests_from_api():
             await report_api_error(
                 bot, "Failed to refresh interests data. Will retry on next cycle."
             )
@@ -148,14 +178,15 @@ async def on_thread_message(
     thread: discord.Thread,
     message: discord.Message,
 ):
-    # Check if this is an interest thread
+    # Check if this is an interest thread and notify if needed
     role_id = interests_manager.get_role_for_thread(thread.id)
-    if role_id and interests_manager.can_notify_role(role_id):
-        logger.info(
-            f"New message in interest thread {thread.name!r}, adding role {role_id} members"
-        )
-        await add_members_with_role(thread, role_id)
-        interests_manager.mark_role_notified(role_id)
+    if role_id:
+        # Atomically check and mark notification to avoid race conditions
+        if await interests_manager.try_notify_role_async(role_id):
+            logger.info(
+                f"New message in interest thread {thread.name!r}, adding role {role_id} members"
+            )
+            await add_members_with_role(thread, role_id)
 
     if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
         logger.info("Noticed mention in #cv-github-linkedin, starting review")

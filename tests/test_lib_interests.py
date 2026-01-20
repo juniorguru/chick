@@ -1,7 +1,7 @@
 """Tests for interests management functionality."""
 
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import discord
 import pytest
@@ -9,7 +9,10 @@ import pytest
 from jg.chick.lib.interests import (
     NOTIFICATION_COOLDOWN,
     InterestsManager,
+    build_thread_to_role_mapping,
     report_api_error,
+    should_refresh,
+    try_notify_role,
 )
 
 
@@ -21,131 +24,138 @@ def interests_manager():
 
 @pytest.fixture
 def sample_interests_data():
-    """Sample interests data as returned from the API."""
+    """Sample interests data as returned from the API (new format with thread_id)."""
     return [
         {
+            "thread_id": 1417459492093693952,
             "role_id": 1420401262658060328,
-            "guild_id": 769966886598737931,
-            "channel_id": 1417459492093693952,
         },
         {
+            "thread_id": 1303022608148594808,
             "role_id": 1420401262658060328,
-            "guild_id": 769966886598737931,
-            "channel_id": 1303022608148594808,
         },
         {
+            "thread_id": 1421134766488420368,
             "role_id": 1085220896005963778,
-            "guild_id": 769966886598737931,
-            "channel_id": 1421134766488420368,
         },
     ]
 
 
-@pytest.mark.asyncio
-async def test_fetch_interests_success(interests_manager, sample_interests_data):
-    """Test successful fetch of interests data."""
-    with patch("aiohttp.ClientSession.get") as mock_get:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=sample_interests_data)
-        mock_get.return_value.__aenter__.return_value = mock_response
-
-        result = await interests_manager.fetch_interests()
-
-        assert result is True
-        assert len(interests_manager.interests) == 3
-        assert interests_manager.last_fetch is not None
-        assert (
-            interests_manager.thread_to_role[1417459492093693952] == 1420401262658060328
-        )
-        assert (
-            interests_manager.thread_to_role[1303022608148594808] == 1420401262658060328
-        )
-        assert (
-            interests_manager.thread_to_role[1421134766488420368] == 1085220896005963778
-        )
+# Tests for functional core (pure functions)
 
 
-@pytest.mark.asyncio
-async def test_fetch_interests_http_error(interests_manager):
-    """Test handling of HTTP errors when fetching interests."""
-    with patch("aiohttp.ClientSession.get") as mock_get:
-        mock_response = AsyncMock()
-        mock_response.status = 404
-        mock_get.return_value.__aenter__.return_value = mock_response
+def test_build_thread_to_role_mapping(sample_interests_data):
+    """Test building thread-to-role mapping from interests data."""
+    mapping = build_thread_to_role_mapping(sample_interests_data)
 
-        result = await interests_manager.fetch_interests()
-
-        assert result is False
-        assert len(interests_manager.interests) == 0
-        assert interests_manager.last_fetch is None
+    assert len(mapping) == 3
+    assert mapping[1417459492093693952] == 1420401262658060328
+    assert mapping[1303022608148594808] == 1420401262658060328
+    assert mapping[1421134766488420368] == 1085220896005963778
 
 
-@pytest.mark.asyncio
-async def test_fetch_interests_exception(interests_manager):
-    """Test handling of exceptions when fetching interests."""
-    with patch("aiohttp.ClientSession.get") as mock_get:
-        mock_get.side_effect = Exception("Network error")
-
-        result = await interests_manager.fetch_interests()
-
-        assert result is False
-        assert len(interests_manager.interests) == 0
+def test_build_thread_to_role_mapping_empty():
+    """Test building mapping from empty data."""
+    mapping = build_thread_to_role_mapping([])
+    assert len(mapping) == 0
 
 
-def test_should_refresh_never_fetched(interests_manager):
+def test_should_refresh_never_fetched():
     """Test should_refresh returns True when never fetched."""
-    assert interests_manager.should_refresh() is True
+    now = datetime.now()
+    assert should_refresh(None, now) is True
 
 
-def test_should_refresh_recently_fetched(interests_manager):
+def test_should_refresh_recently_fetched():
     """Test should_refresh returns False when recently fetched."""
-    interests_manager.last_fetch = datetime.now()
-    assert interests_manager.should_refresh() is False
+    now = datetime.now()
+    last_fetch = now - timedelta(hours=12)
+    assert should_refresh(last_fetch, now) is False
 
 
-def test_should_refresh_old_fetch(interests_manager):
+def test_should_refresh_old_fetch():
     """Test should_refresh returns True when fetch is old."""
-    interests_manager.last_fetch = datetime.now() - timedelta(days=2)
-    assert interests_manager.should_refresh() is True
+    now = datetime.now()
+    last_fetch = now - timedelta(days=2)
+    assert should_refresh(last_fetch, now) is True
 
 
-def test_can_notify_role_never_notified(interests_manager):
-    """Test can_notify_role returns True for a role that was never notified."""
-    assert interests_manager.can_notify_role(12345) is True
+def test_try_notify_role_never_notified():
+    """Test try_notify_role returns True for a role that was never notified."""
+    last_notifications = {}
+    now = datetime.now()
+
+    can_notify, updated = try_notify_role(12345, last_notifications, now)
+
+    assert can_notify is True
+    assert 12345 in updated
+    assert updated[12345] == now
+    # Original dict should not be modified
+    assert 12345 not in last_notifications
 
 
-def test_can_notify_role_recently_notified(interests_manager):
-    """Test can_notify_role returns False for a recently notified role."""
-    role_id = 12345
-    interests_manager.last_notification[role_id] = datetime.now()
-    assert interests_manager.can_notify_role(role_id) is False
+def test_try_notify_role_recently_notified():
+    """Test try_notify_role returns False for a recently notified role."""
+    now = datetime.now()
+    last_notifications = {12345: now - timedelta(hours=12)}
+
+    can_notify, updated = try_notify_role(12345, last_notifications, now)
+
+    assert can_notify is False
+    # Dict should not be modified
+    assert updated == last_notifications
 
 
-def test_can_notify_role_cooldown_expired(interests_manager):
-    """Test can_notify_role returns True when cooldown has expired."""
-    role_id = 12345
-    interests_manager.last_notification[role_id] = (
-        datetime.now() - NOTIFICATION_COOLDOWN - timedelta(seconds=1)
+def test_try_notify_role_cooldown_expired():
+    """Test try_notify_role returns True when cooldown has expired."""
+    now = datetime.now()
+    old_time = now - NOTIFICATION_COOLDOWN - timedelta(seconds=1)
+    last_notifications = {12345: old_time}
+
+    can_notify, updated = try_notify_role(12345, last_notifications, now)
+
+    assert can_notify is True
+    assert updated[12345] == now
+    assert updated[12345] != old_time
+
+
+# Tests for InterestsManager (imperative shell with state)
+
+
+def test_update_interests(interests_manager, sample_interests_data):
+    """Test updating interests data."""
+    now = datetime.now()
+    interests_manager.update_interests(sample_interests_data, now)
+
+    assert len(interests_manager.interests) == 3
+    assert interests_manager.last_fetch == now
+    assert (
+        interests_manager.get_role_for_thread(1417459492093693952)
+        == 1420401262658060328
     )
-    assert interests_manager.can_notify_role(role_id) is True
 
 
-def test_mark_role_notified(interests_manager):
-    """Test marking a role as notified."""
-    role_id = 12345
-    before = datetime.now()
-    interests_manager.mark_role_notified(role_id)
-    after = datetime.now()
+def test_should_refresh_now_never_fetched(interests_manager):
+    """Test should_refresh_now returns True when never fetched."""
+    assert interests_manager.should_refresh_now() is True
 
-    assert role_id in interests_manager.last_notification
-    assert before <= interests_manager.last_notification[role_id] <= after
+
+def test_should_refresh_now_recently_fetched(interests_manager, sample_interests_data):
+    """Test should_refresh_now returns False when recently fetched."""
+    interests_manager.update_interests(sample_interests_data, datetime.now())
+    assert interests_manager.should_refresh_now() is False
+
+
+def test_should_refresh_now_old_fetch(interests_manager, sample_interests_data):
+    """Test should_refresh_now returns True when fetch is old."""
+    old_time = datetime.now() - timedelta(days=2)
+    interests_manager.update_interests(sample_interests_data, old_time)
+    assert interests_manager.should_refresh_now() is True
 
 
 def test_get_role_for_thread(interests_manager, sample_interests_data):
     """Test getting role ID for a thread."""
-    interests_manager.interests = sample_interests_data
-    interests_manager._rebuild_mappings()
+    interests_manager.update_interests(sample_interests_data, datetime.now())
 
     assert (
         interests_manager.get_role_for_thread(1417459492093693952)
@@ -158,20 +168,26 @@ def test_get_role_for_thread(interests_manager, sample_interests_data):
     assert interests_manager.get_role_for_thread(99999) is None
 
 
-def test_is_tracking_thread(interests_manager, sample_interests_data):
-    """Test checking if a thread is being tracked."""
-    interests_manager.interests = sample_interests_data
-    interests_manager._rebuild_mappings()
+@pytest.mark.asyncio
+async def test_try_notify_role_async_success(interests_manager):
+    """Test atomic notification check and mark."""
+    role_id = 12345
 
-    assert interests_manager.is_tracking_thread(1417459492093693952) is True
-    assert interests_manager.is_tracking_thread(99999) is False
+    # First notification should succeed
+    result = await interests_manager.try_notify_role_async(role_id)
+    assert result is True
+
+    # Second immediate notification should fail (cooldown)
+    result = await interests_manager.try_notify_role_async(role_id)
+    assert result is False
 
 
 @pytest.mark.asyncio
 async def test_report_api_error():
     """Test reporting API errors to the error channel."""
     mock_bot = MagicMock()
-    mock_channel = AsyncMock(spec=discord.TextChannel)
+    mock_channel = MagicMock(spec=discord.TextChannel)
+    mock_channel.send = MagicMock(return_value=None)
     mock_bot.get_channel.return_value = mock_channel
 
     await report_api_error(mock_bot, "Test error message")
