@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 
-from jg.chick.lib.interests import Interest, NOTIFICATION_COOLDOWN, parse, should_notify
+from jg.chick.lib.interests import NOTIFICATION_COOLDOWN, Interest, parse, should_notify
 
 
 def test_parse_initializes_from_empty_state():
