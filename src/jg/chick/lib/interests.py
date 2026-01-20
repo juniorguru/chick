@@ -44,6 +44,19 @@ async def fetch(interests_api_url: str = INTERESTS_API_URL) -> Interests:
         }
 
 
+def update(current_interests: Interests, new_interests: Interests) -> Interests:
+    roles = {
+        role["id"]: role["last_notified_at"] for role in current_interests.values()
+    }
+    return {
+        thread_id: {
+            "id": role["id"],
+            "last_notified_at": roles.get(role["id"]),
+        }
+        for thread_id, role in new_interests.items()
+    }
+
+
 @contextlib.asynccontextmanager
 async def report_fetch_error(
     client: discord.Client, channel_id: int = ERROR_REPORT_CHANNEL_ID
@@ -70,5 +83,12 @@ def should_notify(role: Role, now: datetime, cooldown: timedelta | None = None) 
 
 @contextlib.asynccontextmanager
 async def notifying():
+    """
+    Serialize notification attempts using a shared lock
+
+    Acquires a global asyncio lock to prevent notification attempts from
+    running concurrently. Avoids duplicate notifications or updating notification
+    state inconsistently.
+    """
     async with _lock:
         yield

@@ -66,6 +66,9 @@ async def on_ready():
         bot.interests = await interests.fetch()
         logger.info(f"Fetched {len(bot.interests)} interests")
 
+    if not refetch_interests.is_running():
+        refetch_interests.start()
+
 
 @bot.event
 async def on_error(self, event, *args, **kwargs):
@@ -111,10 +114,10 @@ async def discord_id(context: discord.ApplicationContext):
     )
 
 
-@tasks.loop(hours=12)
-async def refresh_interests():
+@tasks.loop(hours=6)
+async def refetch_interests():
     async with interests.report_fetch_error(bot):
-        bot.interests = await interests.fetch()
+        bot.interests = interests.update(bot.interests, await interests.fetch())
         logger.info(f"Fetched {len(bot.interests)} interests")
 
 
@@ -144,9 +147,9 @@ async def on_thread_message(
         starting_message = (await fetch_starting_message(thread)) or message
         await handle_review_thread(starting_message, thread)
 
-    if role := bot.interests.get(thread.id):
-        logger.info(f"Noticed message in interest thread {thread.name!r}")
-        async with interests.notifying():
+    async with interests.notifying():
+        if role := bot.interests.get(thread.id):
+            logger.info(f"Noticed message in interest thread {thread.name!r}")
             if interests.should_notify(role, now):
                 logger.info(f"Notifying role #{role['id']}")
                 await add_members_with_role(thread, role["id"])
