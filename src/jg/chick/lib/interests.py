@@ -82,13 +82,9 @@ def should_notify(
 
 
 @contextlib.asynccontextmanager
-async def notifying():
+async def modifications():
     """
-    Serialize notification attempts using a shared lock
-
-    Acquires a global asyncio lock to prevent notification attempts from
-    running concurrently. Avoids duplicate notifications or updating notification
-    state inconsistently.
+    Avoids duplicate notifications or updating notification state inconsistently
     """
     async with _lock:
         yield

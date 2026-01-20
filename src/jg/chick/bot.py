@@ -61,7 +61,7 @@ async def on_ready():
     for guild in bot.guilds:
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
 
-    async with interests.report_fetch_error(bot):
+    async with interests.modifications(), interests.report_fetch_error(bot):
         bot.interests = interests.parse(
             await interests.fetch(),
             current_interests=bot.interests,
@@ -118,7 +118,7 @@ async def discord_id(context: discord.ApplicationContext):
 
 @tasks.loop(hours=6)
 async def refetch_interests():
-    async with interests.report_fetch_error(bot):
+    async with interests.modifications(), interests.report_fetch_error(bot):
         bot.interests = interests.parse(
             await interests.fetch(),
             current_interests=bot.interests,
@@ -152,7 +152,7 @@ async def on_thread_message(
         starting_message = (await fetch_starting_message(thread)) or message
         await handle_review_thread(starting_message, thread)
 
-    async with interests.notifying():
+    async with interests.modifications():
         if interest := bot.interests.get(thread.id):
             logger.info(f"Noticed message in interest thread {thread.name!r}")
             if interests.should_notify(interest, now):
