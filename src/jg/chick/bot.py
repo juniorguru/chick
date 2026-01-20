@@ -1,12 +1,15 @@
 import asyncio
 import logging
+from datetime import UTC, datetime
 from typing import cast
 
 import aiohttp
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from jg.hen.core import check_profile_url
 
+from jg.chick.lib import interests
+from jg.chick.lib.interests import Interests
 from jg.chick.lib.intro import (
     GREETER_ROLE_ID,
     THREAD_NAME_TEMPLATE as INTRO_THREAD_NAME_TEMPLATE,
@@ -45,13 +48,23 @@ intents = discord.Intents(
 )
 
 
-bot = commands.Bot(intents=intents)
+class ChickBot(commands.Bot):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.interests: Interests = {}
+
+
+bot = ChickBot(intents=intents)
 
 
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
+
+    async with interests.report_fetch_error(bot):
+        bot.interests = await interests.fetch()
+        logger.info(f"Fetched {len(bot.interests)} interests")
 
 
 @bot.event
@@ -98,6 +111,13 @@ async def discord_id(context: discord.ApplicationContext):
     )
 
 
+@tasks.loop(hours=12)
+async def refresh_interests():
+    async with interests.report_fetch_error(bot):
+        bot.interests = await interests.fetch()
+        logger.info(f"Fetched {len(bot.interests)} interests")
+
+
 async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message):
     try:
         response = (
@@ -117,10 +137,22 @@ async def on_thread_message(
     thread: discord.Thread,
     message: discord.Message,
 ):
+    now = datetime.now(UTC)
+
     if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
         logger.info("Noticed mention in #cv-github-linkedin, starting review")
         starting_message = (await fetch_starting_message(thread)) or message
         await handle_review_thread(starting_message, thread)
+
+    if role := bot.interests.get(thread.id):
+        logger.info(f"Noticed message in interest thread {thread.name!r}")
+        async with interests.notifying():
+            if interests.should_notify(role, now):
+                logger.info(f"Notifying role #{role['id']}")
+                await add_members_with_role(thread, role["id"])
+                role["last_notified_at"] = now
+            else:
+                logger.info("Not notifying due to cooldown")
 
 
 async def on_regular_message(
