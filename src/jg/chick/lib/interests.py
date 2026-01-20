@@ -25,35 +25,33 @@ RoleID = int
 LastNotifiedAt = datetime
 
 
-class Role(TypedDict):
-    id: RoleID
+class Interest(TypedDict):
+    role_id: RoleID
     last_notified_at: LastNotifiedAt | None
 
 
-Interests = dict[ThreadID, Role]
+Interests = dict[ThreadID, Interest]
 
 
-async def fetch(interests_api_url: str = INTERESTS_API_URL) -> Interests:
+async def fetch(interests_api_url: str = INTERESTS_API_URL) -> list[dict]:
     async with (
         aiohttp.ClientSession(raise_for_status=True) as session,
         session.get(interests_api_url) as resp,
     ):
-        return {
-            interest["thread_id"]: {"id": interest["role_id"], "last_notified_at": None}
-            for interest in (await resp.json())
-        }
+        return await resp.json()
 
 
-def update(current_interests: Interests, new_interests: Interests) -> Interests:
-    roles = {
-        role["id"]: role["last_notified_at"] for role in current_interests.values()
+def parse(api_payload: list[dict], current_interests: Interests) -> Interests:
+    current_state = {
+        interest_id: interest["last_notified_at"]
+        for interest_id, interest in (current_interests or {}).items()
     }
     return {
-        thread_id: {
-            "id": role["id"],
-            "last_notified_at": roles.get(role["id"]),
+        item["thread_id"]: {
+            "role_id": item["role_id"],
+            "last_notified_at": current_state.get(item["thread_id"]),
         }
-        for thread_id, role in new_interests.items()
+        for item in api_payload
     }
 
 
@@ -74,8 +72,10 @@ async def report_fetch_error(
                 )
 
 
-def should_notify(role: Role, now: datetime, cooldown: timedelta | None = None) -> bool:
-    last_notified_at = role["last_notified_at"]
+def should_notify(
+    interest: Interest, now: datetime, cooldown: timedelta | None = None
+) -> bool:
+    last_notified_at = interest["last_notified_at"]
     if last_notified_at is None:
         return True
     return now - last_notified_at >= (cooldown or NOTIFICATION_COOLDOWN)

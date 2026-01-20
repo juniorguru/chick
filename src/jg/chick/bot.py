@@ -9,7 +9,6 @@ from discord.ext import commands, tasks
 from jg.hen.core import check_profile_url
 
 from jg.chick.lib import interests
-from jg.chick.lib.interests import Interests
 from jg.chick.lib.intro import (
     GREETER_ROLE_ID,
     THREAD_NAME_TEMPLATE as INTRO_THREAD_NAME_TEMPLATE,
@@ -51,7 +50,7 @@ intents = discord.Intents(
 class ChickBot(commands.Bot):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.interests: Interests = {}
+        self.interests: interests.Interests = {}
 
 
 bot = ChickBot(intents=intents)
@@ -63,8 +62,11 @@ async def on_ready():
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
 
     async with interests.report_fetch_error(bot):
-        bot.interests = await interests.fetch()
-        logger.info(f"Fetched {len(bot.interests)} interests")
+        bot.interests = interests.parse(
+            await interests.fetch(),
+            current_interests=bot.interests,
+        )
+        logger.info(f"Fetched {len(bot.interests)} interest threads")
 
     if not refetch_interests.is_running():
         refetch_interests.start()
@@ -117,8 +119,11 @@ async def discord_id(context: discord.ApplicationContext):
 @tasks.loop(hours=6)
 async def refetch_interests():
     async with interests.report_fetch_error(bot):
-        bot.interests = interests.update(bot.interests, await interests.fetch())
-        logger.info(f"Fetched {len(bot.interests)} interests")
+        bot.interests = interests.parse(
+            await interests.fetch(),
+            current_interests=bot.interests,
+        )
+        logger.info(f"Fetched {len(bot.interests)} interest threads")
 
 
 async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message):
@@ -148,12 +153,12 @@ async def on_thread_message(
         await handle_review_thread(starting_message, thread)
 
     async with interests.notifying():
-        if role := bot.interests.get(thread.id):
+        if interest := bot.interests.get(thread.id):
             logger.info(f"Noticed message in interest thread {thread.name!r}")
-            if interests.should_notify(role, now):
-                logger.info(f"Notifying role #{role['id']}")
-                await add_members_with_role(thread, role["id"])
-                role["last_notified_at"] = now
+            if interests.should_notify(interest, now):
+                logger.info(f"Notifying role #{interest['role_id']}")
+                await add_members_with_role(thread, interest["role_id"])
+                interest["last_notified_at"] = now
             else:
                 logger.info("Not notifying due to cooldown")
 
