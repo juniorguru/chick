@@ -1,12 +1,14 @@
 import asyncio
 import logging
+from datetime import UTC, datetime
 from typing import cast
 
 import aiohttp
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from jg.hen.core import check_profile_url
 
+from jg.chick.lib import interests
 from jg.chick.lib.intro import (
     GREETER_ROLE_ID,
     THREAD_NAME_TEMPLATE as INTRO_THREAD_NAME_TEMPLATE,
@@ -45,13 +47,29 @@ intents = discord.Intents(
 )
 
 
-bot = commands.Bot(intents=intents)
+class ChickBot(commands.Bot):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.interests: interests.Interests = {}
+
+
+bot = ChickBot(intents=intents)
 
 
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
+
+    async with interests.modifications(), interests.report_fetch_error(bot):
+        bot.interests = interests.parse(
+            await interests.fetch(),
+            current_interests=bot.interests,
+        )
+        logger.info(f"Fetched {len(bot.interests)} interest threads")
+
+    if not refetch_interests.is_running():
+        refetch_interests.start()
 
 
 @bot.event
@@ -98,6 +116,16 @@ async def discord_id(context: discord.ApplicationContext):
     )
 
 
+@tasks.loop(hours=6)
+async def refetch_interests():
+    async with interests.modifications(), interests.report_fetch_error(bot):
+        bot.interests = interests.parse(
+            await interests.fetch(),
+            current_interests=bot.interests,
+        )
+        logger.info(f"Fetched {len(bot.interests)} interest threads")
+
+
 async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message):
     try:
         response = (
@@ -117,10 +145,22 @@ async def on_thread_message(
     thread: discord.Thread,
     message: discord.Message,
 ):
+    now = datetime.now(UTC)
+
     if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
         logger.info("Noticed mention in #cv-github-linkedin, starting review")
         starting_message = (await fetch_starting_message(thread)) or message
         await handle_review_thread(starting_message, thread)
+
+    async with interests.modifications():
+        if interest := bot.interests.get(thread.id):
+            logger.info(f"Noticed message in interest thread {thread.name!r}")
+            if interests.should_notify(interest, now):
+                logger.info(f"Notifying role #{interest['role_id']}")
+                await add_members_with_role(thread, interest["role_id"])
+                interest["last_notified_at"] = now
+            else:
+                logger.info("Not notifying due to cooldown")
 
 
 async def on_regular_message(
