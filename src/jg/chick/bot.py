@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 import aiohttp
 import discord
@@ -57,29 +57,40 @@ bot = commands.Bot(intents=intents)
 interests_manager = InterestsManager()
 
 
-async def fetch_interests_from_api() -> bool:
+async def fetch_interests(
+    interests_api_url: str, client: discord.Client, now: datetime | None = None
+) -> list[dict[str, Any]] | None:
     """
-    Fetches interests data from the API and updates the manager.
+    Fetches interests data from the API.
 
     This is the "imperative shell" - contains I/O operations.
 
+    Args:
+        interests_api_url: URL to fetch interests from.
+        client: Discord client for error reporting.
+        now: Current datetime (for testing), or None to use datetime.now().
+
     Returns:
-        True if successful, False otherwise.
+        List of interests if successful, None otherwise.
     """
     try:
-        logger.info(f"Fetching interests from {INTERESTS_API_URL}")
-        async with aiohttp.ClientSession() as session:
-            async with session.get(INTERESTS_API_URL) as resp:
-                if resp.status == 200:
-                    interests = await resp.json()
-                    interests_manager.update_interests(interests, datetime.now())
-                    return True
-                else:
-                    logger.error(f"Failed to fetch interests: HTTP {resp.status}")
-                    return False
+        logger.info(f"Fetching interests from {interests_api_url}")
+        async with (
+            aiohttp.ClientSession() as session,
+            session.get(interests_api_url) as resp,
+        ):
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                error_msg = f"Failed to fetch interests: HTTP {resp.status}"
+                logger.error(error_msg)
+                await report_api_error(client, error_msg)
+                return None
     except Exception as e:
-        logger.exception(f"Error fetching interests: {e}")
-        return False
+        error_msg = f"Error fetching interests: {e}"
+        logger.exception(error_msg)
+        await report_api_error(client, error_msg)
+        return None
 
 
 @bot.event
@@ -89,11 +100,8 @@ async def on_ready():
 
     # Fetch interests on startup
     logger.info("Fetching interests on startup")
-    if not await fetch_interests_from_api():
-        await report_api_error(
-            bot,
-            "Failed to fetch interests data on startup. The bot will retry periodically.",
-        )
+    if interests := await fetch_interests(INTERESTS_API_URL, bot):
+        interests_manager.update(interests, datetime.now())
 
     # Start background task for periodic refresh
     if not refresh_interests_task.is_running():
@@ -109,10 +117,8 @@ async def refresh_interests_task():
     """
     if interests_manager.should_refresh_now():
         logger.info("Refreshing interests data")
-        if not await fetch_interests_from_api():
-            await report_api_error(
-                bot, "Failed to refresh interests data. Will retry on next cycle."
-            )
+        if interests := await fetch_interests(INTERESTS_API_URL, bot):
+            interests_manager.update(interests, datetime.now())
 
 
 @bot.event

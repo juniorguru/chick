@@ -125,10 +125,9 @@ def test_try_notify_role_cooldown_expired():
 def test_update_interests(interests_manager, sample_interests_data):
     """Test updating interests data."""
     now = datetime.now()
-    interests_manager.update_interests(sample_interests_data, now)
+    interests_manager.update(sample_interests_data, now)
 
-    assert len(interests_manager.interests) == 3
-    assert interests_manager.last_fetch == now
+    assert interests_manager.last_fetch_time == now
     assert (
         interests_manager.get_role_for_thread(1417459492093693952)
         == 1420401262658060328
@@ -142,20 +141,36 @@ def test_should_refresh_now_never_fetched(interests_manager):
 
 def test_should_refresh_now_recently_fetched(interests_manager, sample_interests_data):
     """Test should_refresh_now returns False when recently fetched."""
-    interests_manager.update_interests(sample_interests_data, datetime.now())
+    interests_manager.update(sample_interests_data, datetime.now())
     assert interests_manager.should_refresh_now() is False
 
 
 def test_should_refresh_now_old_fetch(interests_manager, sample_interests_data):
     """Test should_refresh_now returns True when fetch is old."""
     old_time = datetime.now() - timedelta(days=2)
-    interests_manager.update_interests(sample_interests_data, old_time)
+    interests_manager.update(sample_interests_data, old_time)
     assert interests_manager.should_refresh_now() is True
+
+
+def test_should_refresh_now_with_dependency_injection(
+    interests_manager, sample_interests_data
+):
+    """Test should_refresh_now with explicit now parameter."""
+    fetch_time = datetime(2024, 1, 1, 12, 0)
+    interests_manager.update(sample_interests_data, fetch_time)
+
+    # Test with time just after fetch - should not refresh
+    now = datetime(2024, 1, 1, 18, 0)
+    assert interests_manager.should_refresh_now(now) is False
+
+    # Test with time 2 days later - should refresh
+    now = datetime(2024, 1, 3, 18, 0)
+    assert interests_manager.should_refresh_now(now) is True
 
 
 def test_get_role_for_thread(interests_manager, sample_interests_data):
     """Test getting role ID for a thread."""
-    interests_manager.update_interests(sample_interests_data, datetime.now())
+    interests_manager.update(sample_interests_data, datetime.now())
 
     assert (
         interests_manager.get_role_for_thread(1417459492093693952)

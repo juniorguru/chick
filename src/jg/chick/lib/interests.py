@@ -35,12 +35,7 @@ def build_thread_to_role_mapping(interests: list[dict[str, Any]]) -> dict[int, i
     Returns:
         Dictionary mapping thread IDs to role IDs.
     """
-    mapping = {}
-    for interest in interests:
-        thread_id = interest["thread_id"]
-        role_id = interest["role_id"]
-        mapping[thread_id] = role_id
-    return mapping
+    return {interest["thread_id"]: interest["role_id"] for interest in interests}
 
 
 def should_refresh(last_fetch: datetime | None, now: datetime) -> bool:
@@ -82,11 +77,9 @@ def try_notify_role(
 
     if can_notify:
         # Create a new dict with the updated notification time
-        updated = last_notifications.copy()
-        updated[role_id] = now
+        updated = last_notifications | {role_id: now}
         return True, updated
-    else:
-        return False, last_notifications
+    return False, last_notifications
 
 
 # Imperative Shell - Stateful manager with I/O operations
@@ -101,13 +94,12 @@ class InterestsManager:
     """
 
     def __init__(self):
-        self.interests: list[dict[str, Any]] = []
-        self.last_fetch: datetime | None = None
+        self.last_fetch_time: datetime | None = None
         self.last_notifications: dict[int, datetime] = {}  # role_id -> last time
         self._thread_to_role: dict[int, int] = {}  # thread_id -> role_id mapping
         self._lock = asyncio.Lock()
 
-    def update_interests(self, interests: list[dict[str, Any]], fetch_time: datetime):
+    def update(self, interests: list[dict[str, Any]], fetch_time: datetime):
         """
         Updates interests data and rebuilds mappings atomically.
 
@@ -118,15 +110,20 @@ class InterestsManager:
         # Build new mapping before assigning to ensure atomic replacement
         new_mapping = build_thread_to_role_mapping(interests)
 
-        self.interests = interests
-        self.last_fetch = fetch_time
+        self.last_fetch_time = fetch_time
         self._thread_to_role = new_mapping
 
         logger.info(f"Updated {len(interests)} interest mappings")
 
-    def should_refresh_now(self) -> bool:
-        """Checks if interests data should be refreshed now."""
-        return should_refresh(self.last_fetch, datetime.now())
+    def should_refresh_now(self, now: datetime | None = None) -> bool:
+        """
+        Checks if interests data should be refreshed now.
+
+        Args:
+            now: Current datetime, or None to use datetime.now() (for testing).
+        """
+        now = now or datetime.now()
+        return should_refresh(self.last_fetch_time, now)
 
     def get_role_for_thread(self, thread_id: int) -> int | None:
         """
@@ -160,10 +157,10 @@ class InterestsManager:
             return can_notify
 
 
-async def report_api_error(bot: discord.Client, error_message: str):
+async def report_api_error(client: discord.Client, error_message: str):
     """Reports an API error to the designated error channel."""
     try:
-        channel = bot.get_channel(ERROR_REPORT_CHANNEL_ID)
+        channel = client.get_channel(ERROR_REPORT_CHANNEL_ID)
         if channel and isinstance(channel, discord.TextChannel):
             await channel.send(f"⚠️ **Interests API Error**\n\n{error_message}")
             logger.info(f"Reported error to channel {ERROR_REPORT_CHANNEL_ID}")
