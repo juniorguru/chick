@@ -1,15 +1,11 @@
-"""Interests management for automatically adding role members to threads.
-
-This module follows the "functional core, imperative shell" architecture:
-- Pure functions (functional core) are in this module and are unit tested
-- I/O operations (imperative shell) are in bot.py and tested manually
-"""
+"""Interests management for automatically adding role members to threads."""
 
 import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Any
 
+import aiohttp
 import discord
 
 
@@ -22,143 +18,84 @@ ERROR_REPORT_CHANNEL_ID = 1135903241792651365
 logger = logging.getLogger("jg.chick.interests")
 
 
-# Functional Core - Pure functions with no side effects
+# Module-level state
+_last_fetch_time: datetime | None = None
+_last_notifications: dict[int, datetime] = {}
+_thread_to_role: dict[int, int] = {}
+_lock = asyncio.Lock()
 
 
-def build_thread_to_role_mapping(interests: list[dict[str, Any]]) -> dict[int, int]:
-    """
-    Builds a thread_id -> role_id mapping from interests data.
-
-    Args:
-        interests: List of interest mappings with thread_id and role_id.
-
-    Returns:
-        Dictionary mapping thread IDs to role IDs.
-    """
-    return {interest["thread_id"]: interest["role_id"] for interest in interests}
-
-
-def should_refresh(last_fetch: datetime | None, now: datetime) -> bool:
-    """
-    Checks if interests data should be refreshed.
-
-    Args:
-        last_fetch: When data was last fetched, or None if never fetched.
-        now: Current datetime.
-
-    Returns:
-        True if data should be refreshed, False otherwise.
-    """
-    if last_fetch is None:
+def should_refresh(last_fetch_time: datetime | None, now: datetime) -> bool:
+    if last_fetch_time is None:
         return True
-    return now - last_fetch >= INTERESTS_REFRESH_INTERVAL
+    return now - last_fetch_time >= INTERESTS_REFRESH_INTERVAL
 
 
 def try_notify_role(
     role_id: int, last_notifications: dict[int, datetime], now: datetime
 ) -> tuple[bool, dict[int, datetime]]:
-    """
-    Checks if a role can be notified and returns updated notification state.
-
-    This function is atomic - it checks and marks in one operation to avoid race conditions.
-
-    Args:
-        role_id: The Discord role ID to check.
-        last_notifications: Current notification state (role_id -> datetime).
-        now: Current datetime.
-
-    Returns:
-        Tuple of (can_notify, updated_last_notifications).
-        If can_notify is True, the role should be notified and the returned dict
-        has been updated with the current time.
-    """
     last_time = last_notifications.get(role_id)
     can_notify = last_time is None or (now - last_time >= NOTIFICATION_COOLDOWN)
 
     if can_notify:
-        # Create a new dict with the updated notification time
         updated = last_notifications | {role_id: now}
         return True, updated
     return False, last_notifications
 
 
-# Imperative Shell - Stateful manager with I/O operations
+def update(interests: list[dict[str, Any]], fetch_time: datetime):
+    global _last_fetch_time, _thread_to_role
+    _thread_to_role = {
+        interest["thread_id"]: interest["role_id"] for interest in interests
+    }
+    _last_fetch_time = fetch_time
+    logger.info(f"Updated {len(interests)} interest mappings")
 
 
-class InterestsManager:
-    """
-    Manages interests data and notification rate limiting.
+def should_refresh_now(now: datetime | None = None) -> bool:
+    now = now or datetime.now()
+    return should_refresh(_last_fetch_time, now)
 
-    This is the "imperative shell" that coordinates I/O operations and maintains state.
-    It delegates pure logic to functional core functions above.
-    """
 
-    def __init__(self):
-        self.last_fetch_time: datetime | None = None
-        self.last_notifications: dict[int, datetime] = {}  # role_id -> last time
-        self._thread_to_role: dict[int, int] = {}  # thread_id -> role_id mapping
-        self._lock = asyncio.Lock()
+def get_role_for_thread(thread_id: int) -> int | None:
+    return _thread_to_role.get(thread_id)
 
-    def update(self, interests: list[dict[str, Any]], fetch_time: datetime):
-        """
-        Updates interests data and rebuilds mappings atomically.
 
-        Args:
-            interests: New interests data.
-            fetch_time: When the data was fetched.
-        """
-        # Build new mapping before assigning to ensure atomic replacement
-        new_mapping = build_thread_to_role_mapping(interests)
+async def try_notify_role_async(role_id: int) -> bool:
+    global _last_notifications
+    async with _lock:
+        can_notify, updated_notifications = try_notify_role(
+            role_id, _last_notifications, datetime.now()
+        )
+        if can_notify:
+            _last_notifications = updated_notifications
+        return can_notify
 
-        self.last_fetch_time = fetch_time
-        self._thread_to_role = new_mapping
 
-        logger.info(f"Updated {len(interests)} interest mappings")
-
-    def should_refresh_now(self, now: datetime | None = None) -> bool:
-        """
-        Checks if interests data should be refreshed now.
-
-        Args:
-            now: Current datetime, or None to use datetime.now() (for testing).
-        """
-        now = now or datetime.now()
-        return should_refresh(self.last_fetch_time, now)
-
-    def get_role_for_thread(self, thread_id: int) -> int | None:
-        """
-        Gets the role ID for a given thread ID.
-
-        Args:
-            thread_id: The Discord thread/channel ID.
-
-        Returns:
-            The role ID if found, None otherwise.
-        """
-        # Dictionary reads are atomic in Python, so no lock needed
-        return self._thread_to_role.get(thread_id)
-
-    async def try_notify_role_async(self, role_id: int) -> bool:
-        """
-        Atomically checks if a role can be notified and marks it as notified.
-
-        Args:
-            role_id: The Discord role ID to notify.
-
-        Returns:
-            True if the role should be notified, False if in cooldown.
-        """
-        async with self._lock:
-            can_notify, updated_notifications = try_notify_role(
-                role_id, self.last_notifications, datetime.now()
-            )
-            if can_notify:
-                self.last_notifications = updated_notifications
-            return can_notify
+async def fetch_interests(
+    interests_api_url: str, client: discord.Client, now: datetime | None = None
+) -> list[dict[str, Any]] | None:
+    try:
+        logger.info(f"Fetching interests from {interests_api_url}")
+        async with (
+            aiohttp.ClientSession() as session,
+            session.get(interests_api_url) as resp,
+        ):
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                error_msg = f"Failed to fetch interests: HTTP {resp.status}"
+                logger.error(error_msg)
+                await report_api_error(client, error_msg)
+                return None
+    except Exception as e:
+        error_msg = f"Error fetching interests: {e}"
+        logger.exception(error_msg)
+        await report_api_error(client, error_msg)
+        return None
 
 
 async def report_api_error(client: discord.Client, error_message: str):
-    """Reports an API error to the designated error channel."""
     try:
         channel = client.get_channel(ERROR_REPORT_CHANNEL_ID)
         if channel and isinstance(channel, discord.TextChannel):

@@ -1,18 +1,15 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, cast
+from typing import cast
 
 import aiohttp
 import discord
 from discord.ext import commands, tasks
 from jg.hen.core import check_profile_url
 
-from jg.chick.lib.interests import (
-    INTERESTS_API_URL,
-    InterestsManager,
-    report_api_error,
-)
+from jg.chick.lib import interests
+from jg.chick.lib.interests import INTERESTS_API_URL
 from jg.chick.lib.intro import (
     GREETER_ROLE_ID,
     THREAD_NAME_TEMPLATE as INTRO_THREAD_NAME_TEMPLATE,
@@ -53,72 +50,26 @@ intents = discord.Intents(
 
 bot = commands.Bot(intents=intents)
 
-# Initialize interests manager
-interests_manager = InterestsManager()
-
-
-async def fetch_interests(
-    interests_api_url: str, client: discord.Client, now: datetime | None = None
-) -> list[dict[str, Any]] | None:
-    """
-    Fetches interests data from the API.
-
-    This is the "imperative shell" - contains I/O operations.
-
-    Args:
-        interests_api_url: URL to fetch interests from.
-        client: Discord client for error reporting.
-        now: Current datetime (for testing), or None to use datetime.now().
-
-    Returns:
-        List of interests if successful, None otherwise.
-    """
-    try:
-        logger.info(f"Fetching interests from {interests_api_url}")
-        async with (
-            aiohttp.ClientSession() as session,
-            session.get(interests_api_url) as resp,
-        ):
-            if resp.status == 200:
-                return await resp.json()
-            else:
-                error_msg = f"Failed to fetch interests: HTTP {resp.status}"
-                logger.error(error_msg)
-                await report_api_error(client, error_msg)
-                return None
-    except Exception as e:
-        error_msg = f"Error fetching interests: {e}"
-        logger.exception(error_msg)
-        await report_api_error(client, error_msg)
-        return None
-
 
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
         logger.info(f"Joined Discord {guild.name!r} as {guild.me.display_name!r}")
 
-    # Fetch interests on startup
     logger.info("Fetching interests on startup")
-    if interests := await fetch_interests(INTERESTS_API_URL, bot):
-        interests_manager.update(interests, datetime.now())
+    if data := await interests.fetch_interests(INTERESTS_API_URL, bot):
+        interests.update(data, datetime.now())
 
-    # Start background task for periodic refresh
     if not refresh_interests_task.is_running():
         refresh_interests_task.start()
 
 
 @tasks.loop(hours=1)
 async def refresh_interests_task():
-    """
-    Background task to periodically check and refresh interests data.
-
-    Runs every hour but only refreshes if data is older than INTERESTS_REFRESH_INTERVAL.
-    """
-    if interests_manager.should_refresh_now():
+    if interests.should_refresh_now():
         logger.info("Refreshing interests data")
-        if interests := await fetch_interests(INTERESTS_API_URL, bot):
-            interests_manager.update(interests, datetime.now())
+        if data := await interests.fetch_interests(INTERESTS_API_URL, bot):
+            interests.update(data, datetime.now())
 
 
 @bot.event
@@ -184,11 +135,9 @@ async def on_thread_message(
     thread: discord.Thread,
     message: discord.Message,
 ):
-    # Check if this is an interest thread and notify if needed
-    role_id = interests_manager.get_role_for_thread(thread.id)
+    role_id = interests.get_role_for_thread(thread.id)
     if role_id:
-        # Atomically check and mark notification to avoid race conditions
-        if await interests_manager.try_notify_role_async(role_id):
+        if await interests.try_notify_role_async(role_id):
             logger.info(
                 f"New message in interest thread {thread.name!r}, adding role {role_id} members"
             )
