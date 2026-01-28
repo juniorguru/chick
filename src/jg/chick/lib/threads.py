@@ -79,7 +79,18 @@ async def ensure_thread_name(thread: discord.Thread, name_template) -> str | Non
 
 async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
     """Adds members of given role to given thread"""
-    raise NotImplementedError()
+    if not thread.parent:
+        raise ValueError(f"Thread {thread.jump_url} has no parent channel")
+
+    guild = thread.parent.guild
+    role = guild.get_role(role_id)
+    if not role:
+        raise ValueError(f"Role #{role_id} not found in guild {guild.name!r}")
+
+    thread_members_ids = [member.id for member in thread.members]
+    for member in role.members:
+        if member.id not in thread_members_ids:
+            await thread.add_user(member)
 
 
 async def ping_members_with_role(thread: discord.Thread, role_id: int) -> None:

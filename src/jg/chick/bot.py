@@ -25,6 +25,7 @@ from jg.chick.lib.reviews import (
     prepare_tags,
 )
 from jg.chick.lib.threads import (
+    add_members_with_role,
     ensure_thread_name,
     fetch_starting_message,
     is_thread_created,
@@ -156,11 +157,11 @@ async def on_thread_message(
         if interest := bot.interests.get(thread.id):
             logger.info(f"Noticed message in interest thread {thread.name!r}")
             if interests.should_notify(interest, now):
-                logger.info(f"Notifying role #{interest['role_id']}")
-                await ping_members_with_role(thread, interest["role_id"])
+                logger.info(f"Adding role #{interest['role_id']}")
+                await add_members_with_role(thread, interest["role_id"])
                 interest["last_notified_at"] = now
             else:
-                logger.info("Not notifying due to cooldown")
+                logger.info("Not adding due to cooldown")
 
 
 async def on_regular_message(
