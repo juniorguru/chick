@@ -25,11 +25,11 @@ from jg.chick.lib.reviews import (
     prepare_tags,
 )
 from jg.chick.lib.threads import (
-    ping_members_with_role,
     ensure_thread_name,
     fetch_starting_message,
     is_thread_created,
     name_thread,
+    ping_members_with_role,
 )
 
 
