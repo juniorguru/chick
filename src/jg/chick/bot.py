@@ -25,7 +25,7 @@ from jg.chick.lib.reviews import (
     prepare_tags,
 )
 from jg.chick.lib.threads import (
-    add_members_with_role,
+    ping_members_with_role,
     ensure_thread_name,
     fetch_starting_message,
     is_thread_created,
@@ -157,7 +157,7 @@ async def on_thread_message(
             logger.info(f"Noticed message in interest thread {thread.name!r}")
             if interests.should_notify(interest, now):
                 logger.info(f"Notifying role #{interest['role_id']}")
-                await add_members_with_role(thread, interest["role_id"])
+                await ping_members_with_role(thread, interest["role_id"])
                 interest["last_notified_at"] = now
             else:
                 logger.info("Not notifying due to cooldown")
@@ -240,7 +240,7 @@ async def handle_intro_thread(
 
 async def manage_intro_thread(thread: discord.Thread, intro_message_content: str):
     await thread.send(**generate_intro_message(intro_message_content))
-    await add_members_with_role(thread, GREETER_ROLE_ID)
+    await ping_members_with_role(thread, GREETER_ROLE_ID)
 
 
 async def handle_job_posting_thread(
@@ -274,7 +274,7 @@ async def handle_review_thread(
             ),
             suppress=True,
         )
-        await add_members_with_role(thread, REVIEWER_ROLE_ID)
+        await ping_members_with_role(thread, REVIEWER_ROLE_ID)
 
     if github_url := find_github_url(starting_message.content):
         logger.info(f"Found {github_url} in {thread.name!r}, reviewing…")
@@ -324,7 +324,7 @@ async def handle_review_thread(
             ),
             suppress=True,
         )
-        await add_members_with_role(thread, REVIEWER_ROLE_ID)
+        await ping_members_with_role(thread, REVIEWER_ROLE_ID)
 
     await thread.edit(
         applied_tags=prepare_tags(
