@@ -1,4 +1,5 @@
 import asyncio
+import io
 import logging
 from datetime import UTC, datetime
 from typing import cast
@@ -23,6 +24,12 @@ from jg.chick.lib.reviews import (
     find_linkedin_url,
     format_summary,
     prepare_tags,
+)
+from jg.chick.lib.thread_export import (
+    DENICKY_CHANNEL_ID,
+    can_export_thread,
+    export_thread,
+    is_in_denicky_channel,
 )
 from jg.chick.lib.threads import (
     add_members_with_role,
@@ -114,6 +121,57 @@ async def discord_id(context: discord.ApplicationContext):
         f"Tvoje Discord ID je `{context.author.id}`. "
         "Až si budeš zakládat profil v [seznamu kandidátů](https://junior.guru/candidates/), "
         "bude se ti tahle informace hodit <a:awkward:985064290044223488>"
+    )
+
+
+@bot.slash_command(description="Exportuj vlákno z deníčků do JSON")
+async def export_denicky(context: discord.ApplicationContext):
+    if not isinstance(context.channel, discord.Thread):
+        await context.respond("Tento příkaz funguje pouze ve vláknech.", ephemeral=True)
+        return
+
+    thread = context.channel
+
+    if not is_in_denicky_channel(thread):
+        await context.respond(
+            f"Tento příkaz funguje pouze ve vláknech v kanálu <#{DENICKY_CHANNEL_ID}>.",
+            ephemeral=True,
+        )
+        return
+
+    starting_message = await fetch_starting_message(thread)
+
+    if not can_export_thread(context.author, starting_message, bot.owner_id):
+        await context.respond(
+            "Nemáš oprávnění exportovat toto vlákno. "
+            "Export mohou provést pouze moderátoři, vlastník bota nebo autor prvního příspěvku.",
+            ephemeral=True,
+        )
+        return
+
+    await context.defer(ephemeral=True)
+
+    logger.info(f"Exporting thread {thread.name!r} for {context.author.display_name}")
+    try:
+        exported = await export_thread(thread)
+        json_content = exported.to_json()
+    except Exception:
+        logger.exception(f"Failed to export thread {thread.name!r}")
+        await context.followup.send(
+            "Export se nezdařil. Zkus to prosím znovu později.",
+            ephemeral=True,
+        )
+        return
+
+    file = discord.File(
+        fp=io.StringIO(json_content),
+        filename=f"thread_{thread.id}.json",
+    )
+
+    await context.followup.send(
+        f"Export vlákna **{thread.name}** ({len(exported.messages)} zpráv):",
+        file=file,
+        ephemeral=True,
     )
 
 
