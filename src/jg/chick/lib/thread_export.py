@@ -15,6 +15,8 @@ DENICKY_CHANNEL_ID = 1075087192101244928
 
 @dataclass
 class ExportedMessage:
+    """Represents an exported Discord message with author information."""
+
     id: int
     author_id: int
     author_name: str
@@ -22,17 +24,21 @@ class ExportedMessage:
     created_at: str
 
     def to_dict(self) -> dict:
+        """Convert the message to a dictionary."""
         return asdict(self)
 
 
 @dataclass
 class ExportedThread:
+    """Represents an exported Discord thread with all its messages."""
+
     id: int
     name: str
     created_at: str
     messages: list[ExportedMessage]
 
     def to_dict(self) -> dict:
+        """Convert the thread and its messages to a dictionary."""
         return {
             "id": self.id,
             "name": self.name,
@@ -41,6 +47,7 @@ class ExportedThread:
         }
 
     def to_json(self) -> str:
+        """Convert the thread to a JSON string with proper Unicode support."""
         return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
 
 
