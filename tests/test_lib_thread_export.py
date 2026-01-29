@@ -10,6 +10,8 @@ from jg.chick.lib.thread_export import (
     ExportedThread,
     can_export_thread,
     export_message,
+    export_thread,
+    export_thread_messages,
     format_datetime,
     is_in_denicky_channel,
 )
@@ -78,57 +80,50 @@ def test_is_in_denicky_channel_false_no_parent():
 
 def test_can_export_thread_owner():
     user = cast(discord.Member, MockMember(user_id=12345))
-    thread = cast(discord.Thread, MockThread())
     starting_message = cast(discord.Message, MockMessage(1, 99999, "Other", "Hello"))
 
-    assert can_export_thread(user, thread, starting_message, owner_id=12345) is True
+    assert can_export_thread(user, starting_message, owner_id=12345) is True
 
 
 def test_can_export_thread_moderator():
     user = cast(discord.Member, MockMember(user_id=12345, manage_messages=True))
-    thread = cast(discord.Thread, MockThread())
     starting_message = cast(discord.Message, MockMessage(1, 99999, "Other", "Hello"))
 
-    assert can_export_thread(user, thread, starting_message, owner_id=0) is True
+    assert can_export_thread(user, starting_message, owner_id=None) is True
 
 
 def test_can_export_thread_author():
     user = cast(discord.Member, MockMember(user_id=12345))
-    thread = cast(discord.Thread, MockThread())
     starting_message = cast(discord.Message, MockMessage(1, 12345, "Author", "Hello"))
 
-    assert can_export_thread(user, thread, starting_message, owner_id=0) is True
+    assert can_export_thread(user, starting_message, owner_id=None) is True
 
 
 def test_can_export_thread_unauthorized():
     user = cast(discord.Member, MockMember(user_id=12345))
-    thread = cast(discord.Thread, MockThread())
     starting_message = cast(discord.Message, MockMessage(1, 99999, "Other", "Hello"))
 
-    assert can_export_thread(user, thread, starting_message, owner_id=0) is False
+    assert can_export_thread(user, starting_message, owner_id=None) is False
 
 
 def test_can_export_thread_no_starting_message():
     user = cast(discord.Member, MockMember(user_id=12345))
-    thread = cast(discord.Thread, MockThread())
 
-    assert can_export_thread(user, thread, None, owner_id=0) is False
+    assert can_export_thread(user, None, owner_id=None) is False
 
 
 def test_can_export_thread_user_not_member():
     user = cast(discord.User, MockUser(user_id=12345))
-    thread = cast(discord.Thread, MockThread())
     starting_message = cast(discord.Message, MockMessage(1, 12345, "Author", "Hello"))
 
-    assert can_export_thread(user, thread, starting_message, owner_id=0) is True
+    assert can_export_thread(user, starting_message, owner_id=None) is True
 
 
 def test_can_export_thread_user_not_member_unauthorized():
     user = cast(discord.User, MockUser(user_id=12345))
-    thread = cast(discord.Thread, MockThread())
     starting_message = cast(discord.Message, MockMessage(1, 99999, "Other", "Hello"))
 
-    assert can_export_thread(user, thread, starting_message, owner_id=0) is False
+    assert can_export_thread(user, starting_message, owner_id=None) is False
 
 
 # Tests for format_datetime
@@ -240,22 +235,126 @@ def test_exported_thread_to_json_unicode():
 @pytest.mark.parametrize(
     "user_id, author_id, is_moderator, owner_id, expected",
     [
-        pytest.param(100, 100, False, 0, True, id="author can export"),
-        pytest.param(100, 200, True, 0, True, id="moderator can export"),
+        pytest.param(100, 100, False, None, True, id="author can export"),
+        pytest.param(100, 200, True, None, True, id="moderator can export"),
         pytest.param(100, 200, False, 100, True, id="owner can export"),
-        pytest.param(100, 200, False, 0, False, id="random user cannot export"),
+        pytest.param(100, 200, False, None, False, id="random user cannot export"),
         pytest.param(100, 200, True, 100, True, id="owner+moderator can export"),
     ],
 )
 def test_can_export_thread_parametrized(
-    user_id: int, author_id: int, is_moderator: bool, owner_id: int, expected: bool
+    user_id: int,
+    author_id: int,
+    is_moderator: bool,
+    owner_id: int | None,
+    expected: bool,
 ):
     user = cast(
         discord.Member, MockMember(user_id=user_id, manage_messages=is_moderator)
     )
-    thread = cast(discord.Thread, MockThread())
     starting_message = cast(
         discord.Message, MockMessage(1, author_id, "Author", "Hello")
     )
 
-    assert can_export_thread(user, thread, starting_message, owner_id) is expected
+    assert can_export_thread(user, starting_message, owner_id) is expected
+
+
+# Tests for async functions
+
+
+class MockThreadWithHistory:
+    def __init__(
+        self,
+        thread_id: int,
+        name: str,
+        messages: list,
+        created_at: datetime | None = None,
+    ):
+        self.id = thread_id
+        self.name = name
+        self._messages = messages
+        self.created_at = created_at
+        self.archive_timestamp = datetime(2024, 1, 15, 8, 0, 0, tzinfo=UTC)
+
+    def history(self, limit: int | None = None, oldest_first: bool = False):
+        return MockAsyncIterator(self._messages, oldest_first)
+
+
+class MockAsyncIterator:
+    def __init__(self, items: list, oldest_first: bool = False):
+        self._items = items if oldest_first else list(reversed(items))
+        self._index = 0
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        if self._index >= len(self._items):
+            raise StopAsyncIteration
+        item = self._items[self._index]
+        self._index += 1
+        return item
+
+
+@pytest.mark.asyncio
+async def test_export_thread_messages():
+    messages = [
+        MockMessage(1, 100, "User1", "First message"),
+        MockMessage(2, 200, "User2", "Second message"),
+        MockMessage(3, 100, "User1", "Third message"),
+    ]
+    thread = cast(discord.Thread, MockThreadWithHistory(999, "Test Thread", messages))
+
+    exported = await export_thread_messages(thread)
+
+    assert len(exported) == 3
+    assert exported[0].id == 1
+    assert exported[0].author_name == "User1"
+    assert exported[0].content == "First message"
+    assert exported[1].id == 2
+    assert exported[1].author_name == "User2"
+    assert exported[2].id == 3
+
+
+@pytest.mark.asyncio
+async def test_export_thread_messages_empty():
+    thread = cast(discord.Thread, MockThreadWithHistory(999, "Empty Thread", []))
+
+    exported = await export_thread_messages(thread)
+
+    assert len(exported) == 0
+
+
+@pytest.mark.asyncio
+async def test_export_thread():
+    messages = [
+        MockMessage(1, 100, "User1", "Hello"),
+        MockMessage(2, 200, "User2", "World"),
+    ]
+    created_at = datetime(2024, 1, 15, 9, 0, 0, tzinfo=UTC)
+    thread = cast(
+        discord.Thread,
+        MockThreadWithHistory(999, "Test Thread", messages, created_at=created_at),
+    )
+
+    exported = await export_thread(thread)
+
+    assert exported.id == 999
+    assert exported.name == "Test Thread"
+    assert exported.created_at == "2024-01-15T09:00:00+00:00"
+    assert len(exported.messages) == 2
+    assert exported.messages[0].content == "Hello"
+    assert exported.messages[1].content == "World"
+
+
+@pytest.mark.asyncio
+async def test_export_thread_uses_archive_timestamp_when_no_created_at():
+    messages = [MockMessage(1, 100, "User1", "Hello")]
+    thread = cast(
+        discord.Thread,
+        MockThreadWithHistory(999, "Test Thread", messages, created_at=None),
+    )
+
+    exported = await export_thread(thread)
+
+    assert exported.created_at == "2024-01-15T08:00:00+00:00"

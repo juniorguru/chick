@@ -141,8 +141,7 @@ async def export_denicky(context: discord.ApplicationContext):
 
     starting_message = await fetch_starting_message(thread)
 
-    owner_id = bot.owner_id if bot.owner_id else 0
-    if not can_export_thread(context.author, thread, starting_message, owner_id):
+    if not can_export_thread(context.author, starting_message, bot.owner_id):
         await context.respond(
             "Nemáš oprávnění exportovat toto vlákno. "
             "Export mohou provést pouze moderátoři, vlastník bota nebo autor prvního příspěvku.",
@@ -153,8 +152,16 @@ async def export_denicky(context: discord.ApplicationContext):
     await context.defer(ephemeral=True)
 
     logger.info(f"Exporting thread {thread.name!r} for {context.author.display_name}")
-    exported = await export_thread(thread)
-    json_content = exported.to_json()
+    try:
+        exported = await export_thread(thread)
+        json_content = exported.to_json()
+    except Exception:
+        logger.exception(f"Failed to export thread {thread.name!r}")
+        await context.followup.send(
+            "Export se nezdařil. Zkus to prosím znovu později.",
+            ephemeral=True,
+        )
+        return
 
     file = discord.File(
         fp=io.StringIO(json_content),

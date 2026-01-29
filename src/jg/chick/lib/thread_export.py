@@ -39,12 +39,7 @@ class ExportedThread:
 
     def to_dict(self) -> dict:
         """Convert the thread and its messages to a dictionary."""
-        return {
-            "id": self.id,
-            "name": self.name,
-            "created_at": self.created_at,
-            "messages": [msg.to_dict() for msg in self.messages],
-        }
+        return asdict(self)
 
     def to_json(self) -> str:
         """Convert the thread to a JSON string with proper Unicode support."""
@@ -60,9 +55,8 @@ def is_in_denicky_channel(thread: discord.Thread) -> bool:
 
 def can_export_thread(
     user: discord.Member | discord.User,
-    thread: discord.Thread,
     starting_message: discord.Message | None,
-    owner_id: int,
+    owner_id: int | None,
 ) -> bool:
     """
     Check if the user can export the thread.
@@ -71,7 +65,7 @@ def can_export_thread(
     - A moderator (has manage_messages permission)
     - The author of the first post in the thread
     """
-    if user.id == owner_id:
+    if owner_id and user.id == owner_id:
         return True
 
     if guild_permissions := getattr(user, "guild_permissions", None):
