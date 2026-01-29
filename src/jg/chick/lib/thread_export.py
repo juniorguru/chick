@@ -23,10 +23,6 @@ class ExportedMessage:
     content: str
     created_at: str
 
-    def to_dict(self) -> dict:
-        """Convert the message to a dictionary."""
-        return asdict(self)
-
 
 @dataclass
 class ExportedThread:
@@ -37,13 +33,9 @@ class ExportedThread:
     created_at: str
     messages: list[ExportedMessage]
 
-    def to_dict(self) -> dict:
-        """Convert the thread and its messages to a dictionary."""
-        return asdict(self)
-
     def to_json(self) -> str:
         """Convert the thread to a JSON string with proper Unicode support."""
-        return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+        return json.dumps(asdict(self), ensure_ascii=False, indent=2)
 
 
 def is_in_denicky_channel(thread: discord.Thread) -> bool:
@@ -78,19 +70,14 @@ def can_export_thread(
     return False
 
 
-def format_datetime(dt: datetime) -> str:
-    """Format datetime to ISO 8601 string."""
-    return dt.isoformat()
-
-
 def export_message(message: discord.Message) -> ExportedMessage:
-    """Export a single message."""
+    """Export a single message to ExportedMessage."""
     return ExportedMessage(
         id=message.id,
         author_id=message.author.id,
         author_name=message.author.display_name,
         content=message.content,
-        created_at=format_datetime(message.created_at),
+        created_at=message.created_at.isoformat(),
     )
 
 
@@ -111,7 +98,7 @@ async def export_thread(thread: discord.Thread) -> ExportedThread:
     messages = await export_thread_messages(thread)
 
     created_at = thread.created_at or thread.archive_timestamp
-    created_at_str = format_datetime(created_at) if created_at else ""
+    created_at_str = created_at.isoformat() if created_at else ""
 
     return ExportedThread(
         id=thread.id,

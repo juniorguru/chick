@@ -12,7 +12,6 @@ from jg.chick.lib.thread_export import (
     export_message,
     export_thread,
     export_thread_messages,
-    format_datetime,
     is_in_denicky_channel,
 )
 
@@ -126,19 +125,6 @@ def test_can_export_thread_user_not_member_unauthorized():
     assert can_export_thread(user, starting_message, owner_id=None) is False
 
 
-# Tests for format_datetime
-
-
-def test_format_datetime():
-    dt = datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC)
-    assert format_datetime(dt) == "2024-01-15T10:30:00+00:00"
-
-
-def test_format_datetime_naive():
-    dt = datetime(2024, 1, 15, 10, 30, 0)
-    assert format_datetime(dt) == "2024-01-15T10:30:00"
-
-
 # Tests for export_message
 
 
@@ -153,50 +139,7 @@ def test_export_message():
     assert exported.created_at == "2024-01-15T10:30:00+00:00"
 
 
-# Tests for ExportedMessage
-
-
-def test_exported_message_to_dict():
-    msg = ExportedMessage(
-        id=123,
-        author_id=456,
-        author_name="TestUser",
-        content="Hello world",
-        created_at="2024-01-15T10:30:00+00:00",
-    )
-    result = msg.to_dict()
-
-    assert result == {
-        "id": 123,
-        "author_id": 456,
-        "author_name": "TestUser",
-        "content": "Hello world",
-        "created_at": "2024-01-15T10:30:00+00:00",
-    }
-
-
-# Tests for ExportedThread
-
-
-def test_exported_thread_to_dict():
-    messages = [
-        ExportedMessage(1, 100, "User1", "First message", "2024-01-15T10:00:00+00:00"),
-        ExportedMessage(2, 200, "User2", "Second message", "2024-01-15T10:01:00+00:00"),
-    ]
-    thread = ExportedThread(
-        id=999,
-        name="Test Thread",
-        created_at="2024-01-15T09:00:00+00:00",
-        messages=messages,
-    )
-    result = thread.to_dict()
-
-    assert result["id"] == 999
-    assert result["name"] == "Test Thread"
-    assert result["created_at"] == "2024-01-15T09:00:00+00:00"
-    assert len(result["messages"]) == 2
-    assert result["messages"][0]["author_name"] == "User1"
-    assert result["messages"][1]["author_name"] == "User2"
+# Tests for ExportedThread.to_json
 
 
 def test_exported_thread_to_json():
