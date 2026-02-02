@@ -35,6 +35,14 @@ COLORS = {
 
 
 def find_cv_url(attachments: list[Attachment]) -> str | None:
+    """Find a CV PDF attachment URL from a list of attachments.
+
+    Args:
+        attachments: List of Discord message attachments.
+
+    Returns:
+        The URL of the first PDF attachment found, None otherwise.
+    """
     for attachment in attachments:
         if attachment.content_type == "application/pdf":
             return attachment.url
@@ -42,6 +50,14 @@ def find_cv_url(attachments: list[Attachment]) -> str | None:
 
 
 def find_github_url(text: str) -> str | None:
+    """Extract GitHub profile URL from text.
+
+    Args:
+        text: The text to search for GitHub URLs.
+
+    Returns:
+        The normalized GitHub profile URL if found, None otherwise.
+    """
     if match := GITHUB_URL_RE.search(text):
         username = match.group("username")
         return f"https://github.com/{username}/"
@@ -49,6 +65,14 @@ def find_github_url(text: str) -> str | None:
 
 
 def find_linkedin_url(text: str) -> str | None:
+    """Extract LinkedIn profile URL from text.
+
+    Args:
+        text: The text to search for LinkedIn URLs.
+
+    Returns:
+        The normalized LinkedIn profile URL if found, None otherwise.
+    """
     if match := LINKEDIN_URL_RE.search(text):
         username = quote(unquote(match.group("username")))
         return f"https://www.linkedin.com/in/{username}/"
@@ -61,6 +85,17 @@ def prepare_tags(
     github: bool = False,
     linkedin: bool = False,
 ) -> list[ForumTag]:
+    """Prepare forum tags based on the types of content found in a review thread.
+
+    Args:
+        thread: The Discord forum thread to apply tags to.
+        cv: Whether a CV was found in the thread.
+        github: Whether a GitHub profile was found.
+        linkedin: Whether a LinkedIn profile was found.
+
+    Returns:
+        List of forum tags to apply to the thread.
+    """
     available_tags = {tag.name: tag for tag in thread.parent.available_tags}
     applied_tags = set(thread.applied_tags)
     if cv:
@@ -75,6 +110,15 @@ def prepare_tags(
 def format_summary(
     summary: Summary, has_profile: bool
 ) -> Generator[dict[str, Any], None, None]:
+    """Format a GitHub profile review summary as Discord messages.
+
+    Args:
+        summary: The review summary from the jg.hen library.
+        has_profile: Whether the user already has a profile on junior.guru/candidates.
+
+    Yields:
+        Dictionary arguments for Discord thread.send() calls.
+    """
     if summary.error:
         yield dict(
             content=(

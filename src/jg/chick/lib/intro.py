@@ -133,7 +133,18 @@ PATTERNS_EMOJIS_MAPPING = {
 
 
 def choose_intro_emojis(intro_message_content: str) -> list[str]:
-    """Returns a list of emoji reactions suitable for given message"""
+    """Select emoji reactions based on technologies mentioned in an introduction.
+
+    Analyzes the message content for technology keywords (Python, JavaScript,
+    Docker, etc.) and returns matching emoji reactions.
+
+    Args:
+        intro_message_content: The text of the user's introduction message.
+
+    Returns:
+        List of emoji strings starting with default welcome emojis,
+        followed by technology-specific emojis.
+    """
     emojis = set()
     for pattern_re, pattern_emojis in PATTERNS_EMOJIS_MAPPING.items():
         if pattern_re.search(intro_message_content):
@@ -142,6 +153,19 @@ def choose_intro_emojis(intro_message_content: str) -> list[str]:
 
 
 def generate_intro_message(intro_message_content: str) -> dict[str, Any]:
+    """Generate a personalized welcome message for a new member.
+
+    Creates a welcome message with helpful tips and links. If the user
+    mentions a GitHub profile in their introduction, includes a suggestion
+    to get it reviewed.
+
+    Args:
+        intro_message_content: The text of the user's introduction message.
+
+    Returns:
+        Dictionary with 'content' (str) and 'view' (ui.View) keys,
+        ready to be unpacked into thread.send().
+    """
     greeting = (
         "Píp, píp! Tady kuře, místní robot. "
         "Vítej v klubu 👋"

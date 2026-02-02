@@ -19,8 +19,21 @@ from jg.chick.web import web
 logger = logging.getLogger("jg.chick")
 
 
-async def run(host, port, discord_api_key) -> None:
-    # inspired by https://stackoverflow.com/a/54462411/325365
+async def run(host: str, port: int, discord_api_key: str) -> None:
+    """Start the web server and Discord bot concurrently.
+
+    This function starts the aiohttp web server for health checks,
+    then starts the Discord bot. On shutdown, it properly cleans up
+    both components.
+
+    Args:
+        host: The hostname to bind the web server to.
+        port: The port to bind the web server to.
+        discord_api_key: The Discord API token for bot authentication.
+
+    Note:
+        Inspired by https://stackoverflow.com/a/54462411/325365
+    """
     logger.info(f"Starting the web app at {host}:{port}")
     runner = AppRunner(web)
     await runner.setup()

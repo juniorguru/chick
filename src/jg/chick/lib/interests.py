@@ -42,6 +42,17 @@ Interests = dict[ThreadID, Interest]
 
 
 async def fetch(interests_api_url: str = INTERESTS_API_URL) -> list[dict]:
+    """Fetch interest thread data from the junior.guru API.
+
+    Args:
+        interests_api_url: URL of the interests API endpoint.
+
+    Returns:
+        List of interest dictionaries from the API.
+
+    Raises:
+        aiohttp.ClientResponseError: If the API request fails.
+    """
     async with (
         aiohttp.ClientSession(raise_for_status=True) as session,
         session.get(interests_api_url) as resp,
@@ -50,6 +61,18 @@ async def fetch(interests_api_url: str = INTERESTS_API_URL) -> list[dict]:
 
 
 def parse(api_payload: list[dict], current_interests: Interests) -> Interests:
+    """Parse API payload into internal interests state.
+
+    Preserves last_notified_at timestamps from the current state for
+    existing threads, while initializing new threads with None.
+
+    Args:
+        api_payload: Raw data from the interests API.
+        current_interests: Current in-memory interest state.
+
+    Returns:
+        Updated interests dictionary mapping thread IDs to Interest data.
+    """
     current_state = {
         interest_id: interest["last_notified_at"]
         for interest_id, interest in (current_interests or {}).items()
@@ -67,6 +90,15 @@ def parse(api_payload: list[dict], current_interests: Interests) -> Interests:
 async def report_fetch_error(
     client: discord.Client, channel_id: int = ERROR_REPORT_CHANNEL_ID
 ):
+    """Context manager that reports fetch errors to a Discord channel.
+
+    Args:
+        client: Discord client for sending messages.
+        channel_id: Channel ID to send error reports to.
+
+    Yields:
+        Nothing, but catches and reports any exceptions.
+    """
     try:
         yield
     except Exception as e:
@@ -83,6 +115,16 @@ async def report_fetch_error(
 def should_notify(
     interest: Interest, now: datetime, cooldown: timedelta | None = None
 ) -> bool:
+    """Check if a role should be notified about activity in an interest thread.
+
+    Args:
+        interest: The interest data containing last notification time.
+        now: Current timestamp for comparison.
+        cooldown: Optional custom cooldown duration (defaults to NOTIFICATION_COOLDOWN).
+
+    Returns:
+        True if enough time has passed since the last notification.
+    """
     last_notified_at = interest["last_notified_at"]
     if last_notified_at is None:
         return True
