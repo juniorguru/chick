@@ -76,9 +76,8 @@ def main(
         logger.warning("Stopping production environment")
         subprocess.run(["flyctl", "machine", "stop"])
 
-    loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(run(host, port, discord_api_key))
+        asyncio.run(run(host, port, discord_api_key))
     except KeyboardInterrupt:
         logger.info("Terminating")
     finally:
