@@ -11,11 +11,6 @@ from typing import Any
 
 from discord import ButtonStyle, ui
 
-from jg.chick.lib.config import GREETER_ROLE_ID, INTRO_THREAD_NAME_TEMPLATE
-
-# Re-export for backward compatibility
-THREAD_NAME_TEMPLATE = INTRO_THREAD_NAME_TEMPLATE
-
 PATTERNS_EMOJIS_MAPPING = {
     re.compile(r"\bpython\w*\b", re.I): [
         "<:python:842331892091322389>",
