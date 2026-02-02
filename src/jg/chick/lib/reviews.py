@@ -44,7 +44,7 @@ def find_linkedin_url(text: str) -> str | None:
     if match := LINKEDIN_URL_RE.search(text):
         username = quote(unquote(match.group("username")))
         return f"https://www.linkedin.com/in/{username}/"
-    return ""
+    return None
 
 
 def prepare_tags(
