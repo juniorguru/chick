@@ -15,12 +15,11 @@ from typing import TypedDict
 import aiohttp
 import discord
 
-
-INTERESTS_API_URL = "https://junior.guru/api/interests.json"
-
-ERROR_REPORT_CHANNEL_ID = 1135903241792651365
-
-NOTIFICATION_COOLDOWN = timedelta(days=1)
+from jg.chick.lib.config import (
+    ERROR_REPORT_CHANNEL_ID,
+    INTERESTS_API_URL,
+    NOTIFICATION_COOLDOWN,
+)
 
 
 logger = logging.getLogger("jg.chick.interests")

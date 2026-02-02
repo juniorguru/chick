@@ -15,15 +15,22 @@ from discord.ext import commands, tasks
 from jg.hen.core import check_profile_url
 
 from jg.chick.lib import interests
-from jg.chick.lib.intro import (
-    GREETER_ROLE_ID,
-    THREAD_NAME_TEMPLATE as INTRO_THREAD_NAME_TEMPLATE,
-    choose_intro_emojis,
-    generate_intro_message,
-)
-from jg.chick.lib.reviews import (
+from jg.chick.lib.config import (
+    CHANNEL_AHOJ,
+    CHANNEL_CV_GITHUB_LINKEDIN,
+    CHANNEL_MUJ_DNESNI_OBJEV,
+    CHANNEL_PAST_VEDLE_PASTI,
+    CHANNEL_PRACE_HLEDAM,
+    CHANNEL_PRACE_INZERATY,
+    EGGTRAY_API_URL,
     GITHUB_API_KEY,
+    GREETER_ROLE_ID,
+    INTERESTS_REFRESH_INTERVAL_HOURS,
+    INTRO_THREAD_NAME_TEMPLATE,
     REVIEWER_ROLE_ID,
+)
+from jg.chick.lib.intro import choose_intro_emojis, generate_intro_message
+from jg.chick.lib.reviews import (
     find_cv_url,
     find_github_url,
     find_linkedin_url,
@@ -38,9 +45,6 @@ from jg.chick.lib.threads import (
     name_thread,
     ping_members_with_role,
 )
-
-
-EGGTRAY_API_URL = "https://juniorguru.github.io/eggtray/profiles.json"
 
 
 logger = logging.getLogger("jg.chick.bot")
@@ -123,7 +127,7 @@ async def discord_id(context: discord.ApplicationContext):
     )
 
 
-@tasks.loop(hours=6)
+@tasks.loop(hours=INTERESTS_REFRESH_INTERVAL_HOURS)
 async def refetch_interests():
     async with interests.modifications(), interests.report_fetch_error(bot):
         bot.interests = interests.parse(
@@ -154,8 +158,8 @@ async def on_thread_message(
 ):
     now = datetime.now(UTC)
 
-    if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
-        logger.info("Noticed mention in #cv-github-linkedin, starting review")
+    if channel.name == CHANNEL_CV_GITHUB_LINKEDIN and bot_user.mention in message.content:
+        logger.info(f"Noticed mention in #{CHANNEL_CV_GITHUB_LINKEDIN}, starting review")
         starting_message = (await fetch_starting_message(thread)) or message
         await handle_review_thread(starting_message, thread)
 
@@ -175,14 +179,14 @@ async def on_regular_message(
     channel: discord.GroupChannel,
     message: discord.Message,
 ):
-    if channel.name == "ahoj":
-        logger.info("Creating thread in #ahoj")
+    if channel.name == CHANNEL_AHOJ:
+        logger.info(f"Creating thread in #{CHANNEL_AHOJ}")
         name = name_thread(message, INTRO_THREAD_NAME_TEMPLATE)
         await message.create_thread(name=name)
         return
 
-    if channel.name == "past-vedle-pasti":
-        logger.info("Creating thread in #past-vedle-pasti")
+    if channel.name == CHANNEL_PAST_VEDLE_PASTI:
+        logger.info(f"Creating thread in #{CHANNEL_PAST_VEDLE_PASTI}")
         name = name_thread(
             message,
             "{weekday} past na {author}",
@@ -191,8 +195,8 @@ async def on_regular_message(
         await message.create_thread(name=name)
         return
 
-    if channel.name == "můj-dnešní-objev":
-        logger.info("Creating thread in #můj-dnešní-objev")
+    if channel.name == CHANNEL_MUJ_DNESNI_OBJEV:
+        logger.info(f"Creating thread in #{CHANNEL_MUJ_DNESNI_OBJEV}")
         name = name_thread(
             message,
             "{weekday} objev od {author}",
@@ -220,13 +224,13 @@ async def on_thread_create(thread: discord.Thread):
         logger.info("Thread created by the bot itself, skipping")
         return
 
-    if channel_name == "ahoj":
+    if channel_name == CHANNEL_AHOJ:
         await handle_intro_thread(starting_message, thread)
-    elif channel_name == "práce-inzeráty":
+    elif channel_name == CHANNEL_PRACE_INZERATY:
         await handle_job_posting_thread(starting_message, thread)
-    elif channel_name == "práce-hledám":
+    elif channel_name == CHANNEL_PRACE_HLEDAM:
         await handle_candidate_thread(starting_message, thread)
-    elif channel_name == "cv-github-linkedin":
+    elif channel_name == CHANNEL_CV_GITHUB_LINKEDIN:
         await handle_review_thread(starting_message, thread)
 
 

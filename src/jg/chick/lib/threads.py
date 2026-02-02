@@ -10,8 +10,7 @@ from datetime import datetime
 
 import discord
 
-
-DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
+from jg.chick.lib.config import DAYS
 
 BRACKETS_RE = re.compile(
     r"""

@@ -6,7 +6,6 @@ It extracts URLs from messages, applies appropriate forum tags,
 and formats review summaries for display.
 """
 
-import os
 import re
 from typing import Any, Generator
 from urllib.parse import quote, unquote
@@ -15,12 +14,7 @@ from discord import Attachment, Color, Embed, ForumTag, Thread
 from jg.eggtray.models import is_ready
 from jg.hen.models import Status, Summary
 
-
-MAINTAINER_ID = 668226181769986078
-
-REVIEWER_ROLE_ID = 1075044541796716604
-
-GITHUB_API_KEY = os.getenv("GITHUB_API_KEY") or None
+from jg.chick.lib.config import GITHUB_API_KEY, MAINTAINER_ID, REVIEWER_ROLE_ID
 
 GITHUB_URL_RE = re.compile(r"github\.com/(?P<username>[\w-]+)")
 
