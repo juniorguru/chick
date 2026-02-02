@@ -1,3 +1,11 @@
+"""Interest thread management for the Discord server.
+
+This module handles interest-based threads where members with specific roles
+are automatically notified when there's activity in threads they're interested in.
+It includes functionality for fetching interest data, managing notification
+cooldowns, and thread-safe state modifications.
+"""
+
 import asyncio
 import contextlib
 import logging

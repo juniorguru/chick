@@ -1,3 +1,10 @@
+"""CLI entry point and application startup for the Chick Discord bot.
+
+This module provides the command-line interface for starting the bot,
+including options for debug mode, production replacement, and configuration
+of the web server host and port.
+"""
+
 import asyncio
 import logging
 import subprocess

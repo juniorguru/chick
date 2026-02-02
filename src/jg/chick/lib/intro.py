@@ -1,3 +1,10 @@
+"""Introduction handling for new members in the #ahoj channel.
+
+This module provides functionality for welcoming new members to the Discord server,
+including emoji selection based on mentioned technologies and generating
+personalized welcome messages.
+"""
+
 import re
 from textwrap import dedent
 from typing import Any

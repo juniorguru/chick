@@ -1,3 +1,9 @@
+"""Main Discord bot logic and event handlers.
+
+This module contains the core bot implementation, including event handlers
+for messages and thread creation, slash commands, and task scheduling.
+"""
+
 import asyncio
 import logging
 from datetime import UTC, datetime

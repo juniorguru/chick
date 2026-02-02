@@ -1,3 +1,11 @@
+"""CV, GitHub, and LinkedIn profile review functionality.
+
+This module provides tools for reviewing and analyzing user profiles,
+including CV attachments, GitHub profiles, and LinkedIn profiles.
+It extracts URLs from messages, applies appropriate forum tags,
+and formats review summaries for display.
+"""
+
 import os
 import re
 from typing import Any, Generator

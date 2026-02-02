@@ -1,3 +1,9 @@
+"""Simple web server for health checks and monitoring.
+
+This module provides a minimal HTTP server used by deployment platforms
+(like Fly.io) to verify the bot is running and healthy.
+"""
+
 import logging
 from datetime import UTC, datetime
 

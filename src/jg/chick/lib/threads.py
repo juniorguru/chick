@@ -1,3 +1,10 @@
+"""Thread utilities for Discord thread management.
+
+This module provides utilities for creating, naming, and managing Discord threads,
+including functions for fetching thread messages, generating thread names,
+and managing thread membership based on roles.
+"""
+
 import re
 from datetime import datetime
 
