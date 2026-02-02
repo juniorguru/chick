@@ -27,7 +27,7 @@ async def index(request: Request) -> Response:
         {
             "status": "ok",
             "launch_at": LAUNCH_AT.isoformat(),
-            "uptime_sec": (datetime.now(UTC) - LAUNCH_AT).seconds,
+            "uptime_sec": int((datetime.now(UTC) - LAUNCH_AT).total_seconds()),
         }
     )
 
