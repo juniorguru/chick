@@ -73,7 +73,7 @@ def main(
 
     logger.info("Starting")
     if production:
-        logger.warning("Stopping production enviornment")
+        logger.warning("Stopping production environment")
         subprocess.run(["flyctl", "machine", "stop"])
 
     loop = asyncio.get_event_loop()
@@ -83,5 +83,5 @@ def main(
         logger.info("Terminating")
     finally:
         if production:
-            logger.warning("Starting production enviornment")
+            logger.warning("Starting production environment")
             subprocess.run(["flyctl", "machine", "start"])
