@@ -56,10 +56,7 @@ def name_thread(
     if bracket_name_template and (match := BRACKETS_RE.match(message.content)):
         content = match.group("bracket_content")
         parts = content.split(",")
-        words = []
-        for part in parts:
-            words.append(part.strip())
-        name_from_brackets = ", ".join(words)
+        name_from_brackets = ", ".join(part.strip() for part in parts)
         return bracket_name_template.format(
             author=message.author.display_name,
             bracket_content=name_from_brackets,
