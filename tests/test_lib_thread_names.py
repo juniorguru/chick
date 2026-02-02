@@ -4,10 +4,7 @@ from typing import cast
 import discord
 import pytest
 
-from jg.chick.lib.threads import name_thread
-
-
-DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
+from jg.chick.lib.threads import DAYS, name_thread
 
 
 class Message:
