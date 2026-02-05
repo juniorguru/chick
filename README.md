@@ -1,10 +1,10 @@
 # Chick 🐤
 
-A real-time, synchronous junior.guru Discord bot.
+A real-time, synchronous junior.guru Discord bot and API.
 
 ## Features
 
-All junior.guru automation happens asynchronously (with up-to-24h delay) in the [main monolith codebase](https://github.com/juniorguru/junior.guru), except of the following tasks provided by this bot:
+All junior.guru automation happens asynchronously (with up-to-24h delay) in the [main monolith codebase](https://github.com/juniorguru/junior.guru), except of the following tasks provided by chick:
 
 - [x] Creating threads in #past-vedle-pasti
 - [x] Creating threads in #můj-dnešní-objev
@@ -20,14 +20,16 @@ _Please, update the above list if adding features._
 
 ## Design decisions
 
-The original, asynchronous bot installs and uses this codebase to run the same code and perform the same tasks, idempotently:
+The original, asynchronous codebase installs and uses chick to run the same code and perform the same tasks, idempotently:
 
--   If this bot crashes, the asynchronous bot will do the same stuff, just with a delay.
--   The purpose of this bot is to provide non-critical progressive enhancement, which can be dropped at any moment.
--   To keep the architecture simple, this bot should have no state.
+-   If chick crashes, the asynchronous codebase will do the same stuff, just with a delay.
+-   The purpose of chick is to provide non-critical progressive enhancement, which can be dropped at any moment.
+-   To keep the architecture simple, chick should have no state.
     There should be no database.
     It should only react to the state and events of the Discord server, and write to the Discord server.
--   The asynchronous bot should monitor whether this bot is up and running.
+    The API should only transfer information to and from other services, such as GitHub.
+-   The purpose of the API is to provide better user experience for website visitors, as the main website is a purely static site. If it doesn't work, the site should fall back to letting the user to do the job themselves manually.
+-   The main asynchronous codebase should monitor whether chick is up and running.
     If it's not, it should fail the build, but non-critically (similar to checking broken links in HTML).
 
 ## Installation

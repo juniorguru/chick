@@ -1,7 +1,7 @@
 [project]
 name = "jg.chick"
 version = "0.0.1"
-description = "A real-time, synchronous junior.guru Discord bot"
+description = "A real-time, synchronous junior.guru Discord bot and API"
 readme = "README.md"
 authors = [{name = "Honza Javorek", email = "honza@junior.guru"}]
 license = {text = "AGPL-3.0-only"}
@@ -9,6 +9,7 @@ requires-python = ">=3.13,<3.14"
 dependencies = [
     "aiohttp>=3.13.1",
     "click>=8.3.0",
+    "githubkit>=0.11.11",
     "jg.eggtray@git+https://github.com/juniorguru/eggtray.git",
     "jg.hen@git+https://github.com/juniorguru/hen.git",
     "py-cord[speed]@git+https://github.com/Pycord-Development/pycord.git",
@@ -24,6 +25,7 @@ chick = "jg.chick.main:main"
 
 [dependency-groups]
 dev = [
+    "pytest-aiohttp>=1.0.5",
     "pytest-asyncio>=1.2.0",
     "pytest-ruff>=0.5",
     "pytest>=8.4.2",

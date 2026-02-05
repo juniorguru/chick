@@ -3,6 +3,8 @@ from datetime import UTC, datetime
 
 from aiohttp.web import Application, Request, Response, RouteTableDef, json_response
 
+from jg.chick.api import routes as api_routes
+
 
 LAUNCH_AT = datetime.now(UTC)
 
@@ -27,3 +29,4 @@ async def index(request: Request) -> Response:
 
 
 web.add_routes(routes)
+web.add_routes(api_routes)
