@@ -12,16 +12,13 @@ from jg.chick.bot import bot
 logger = logging.getLogger("jg.chick")
 
 
-async def run(
-    host, port, discord_api_key, github_api_key, eggtray_owner, eggtray_repo, debug
-) -> None:
+async def run(host, port, discord_api_key, github_api_key, eggtray_url, debug) -> None:
     # inspired by https://stackoverflow.com/a/54462411/325365
     logger.info(f"Starting the web app at {host}:{port}")
 
     # Configure web app
     web["github_api_key"] = github_api_key
-    web["eggtray_owner"] = eggtray_owner
-    web["eggtray_repo"] = eggtray_repo
+    web["eggtray_url"] = eggtray_url
     web["debug"] = debug
 
     runner = AppRunner(web)
@@ -80,16 +77,10 @@ async def run(
     help="GitHub API key.",
 )
 @click.option(
-    "--eggtray-owner",
-    envvar="EGGTRAY_OWNER",
-    default="juniorguru",
-    help="GitHub owner for eggtray repository.",
-)
-@click.option(
-    "--eggtray-repo",
-    envvar="EGGTRAY_REPO",
-    default="eggtray",
-    help="GitHub repository name for eggtray.",
+    "--eggtray-url",
+    envvar="EGGTRAY_URL",
+    default="https://github.com/juniorguru/eggtray",
+    help="GitHub repository URL for eggtray.",
 )
 def main(
     debug: bool,
@@ -98,8 +89,7 @@ def main(
     port: int,
     discord_api_key: str,
     github_api_key: str,
-    eggtray_owner: str,
-    eggtray_repo: str,
+    eggtray_url: str,
 ) -> None:
     logging.basicConfig()
     logging.getLogger("jg").setLevel(logging.DEBUG if debug else logging.INFO)
@@ -117,8 +107,7 @@ def main(
                 port,
                 discord_api_key,
                 github_api_key,
-                eggtray_owner,
-                eggtray_repo,
+                eggtray_url,
                 debug,
             )
         )
