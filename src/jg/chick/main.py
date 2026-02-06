@@ -4,6 +4,7 @@ import subprocess
 
 import click
 from aiohttp.web import AppRunner, TCPSite
+from githubkit import GitHub
 
 from jg.chick.api import web
 from jg.chick.bot import bot
@@ -17,7 +18,7 @@ async def run(host, port, discord_api_key, github_api_key, eggtray_url, debug) -
     logger.info(f"Starting the web app at {host}:{port}")
 
     # Configure web app
-    web["github_api_key"] = github_api_key
+    web["github_client"] = GitHub(github_api_key)
     web["eggtray_url"] = eggtray_url
     web["debug"] = debug
 

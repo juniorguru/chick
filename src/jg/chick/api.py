@@ -6,7 +6,6 @@ from datetime import UTC, datetime
 from enum import StrEnum
 
 from aiohttp.web import Application, Request, Response, RouteTableDef, json_response
-from githubkit import GitHub
 from githubkit.exception import RequestFailed
 
 
@@ -26,71 +25,29 @@ routes = RouteTableDef()
 
 
 def parse_eggtray_url(url: str) -> tuple[str, str]:
-    """Parse eggtray URL to extract owner and repo.
-
-    Args:
-        url: GitHub repository URL (e.g., https://github.com/owner/repo)
-
-    Returns:
-        tuple of (owner, repo)
-
-    Raises:
-        ValueError: if URL format is invalid
-    """
-    # Remove trailing slash
-    url = url.rstrip("/")
-
-    # Match github.com URLs with owner/repo pattern
-    match = re.match(r"https?://github\.com/([^/]+)/([^/]+)(?:/.*)?$", url)
-    if not match:
+    if not (
+        match := re.match(
+            r"https?://github\.com/([^/]+)/([^/]+)(?:/.*)?$", url.rstrip("/")
+        )
+    ):
         raise ValueError(f"Invalid GitHub repository URL: {url}")
-
-    owner, repo = match.groups()
-    return owner, repo
+    return match.groups()
 
 
 def find_summary_comment(comments: list) -> str | None:
-    """Find the last comment containing JSON summary data.
-
-    Args:
-        comments: List of comment objects from GitHub API
-
-    Returns:
-        Comment body string if found, None otherwise
-    """
     for comment in reversed(comments):
-        comment_body = comment.body or ""
-        if "```json" in comment_body:
-            return comment_body
+        if "```json" in (comment.body or ""):
+            return comment.body
     return None
 
 
 def parse_summary_json(comment_body: str) -> dict | None:
-    """Extract and parse JSON data from a comment body.
-
-    Args:
-        comment_body: The full comment text containing JSON code block
-
-    Returns:
-        Parsed JSON dict if successful, None otherwise
-    """
     if json_match := re.search(r"```json\s*\n(.*?)\n```", comment_body, re.DOTALL):
-        try:
-            return json.loads(json_match.group(1))
-        except json.JSONDecodeError as e:
-            logger.warning(f"Failed to parse JSON from comment: {e}")
+        return json.loads(json_match.group(1))
     return None
 
 
 def extract_actions_url(comment_body: str) -> str | None:
-    """Extract GitHub Actions run URL from comment body.
-
-    Args:
-        comment_body: The full comment text
-
-    Returns:
-        Actions URL if found, None otherwise
-    """
     if actions_match := re.search(
         r"https://github\.com/juniorguru/eggtray/actions/runs/(\d+)",
         comment_body,
@@ -121,23 +78,21 @@ async def index(request: Request) -> Response:
 
 @routes.post("/checks/{github_username}")
 async def create_check(request: Request) -> Response:
-    """Create a new GitHub issue for profile review."""
     github_username = request.match_info["github_username"]
     logger.info(f"Creating check for GitHub username: {github_username}")
 
-    github_api_key = request.app["github_api_key"]
+    github_client = request.app["github_client"]
     eggtray_url = request.app["eggtray_url"]
     debug = request.app["debug"]
 
     try:
         eggtray_owner, eggtray_repo = parse_eggtray_url(eggtray_url)
-        github = GitHub(github_api_key) if github_api_key else GitHub()
 
         title = f"Zpětná vazba na profil @{github_username}"
         body = f"Z webu junior.guru přišel požadavek na zpětnou vazbu k profilu @{github_username}."
 
         logger.debug(f"Creating issue in {eggtray_owner}/{eggtray_repo}")
-        issue = github.rest.issues.create(
+        issue = github_client.rest.issues.create(
             owner=eggtray_owner,
             repo=eggtray_repo,
             title=title,
@@ -168,7 +123,6 @@ async def create_check(request: Request) -> Response:
 
 @routes.get("/checks/{issue_number}")
 async def get_check_status(request: Request) -> Response:
-    """Get the status of a profile review check."""
     try:
         issue_number = int(request.match_info["issue_number"])
     except ValueError:
@@ -179,19 +133,18 @@ async def get_check_status(request: Request) -> Response:
 
     logger.info(f"Getting check status for issue #{issue_number}")
 
-    github_api_key = request.app["github_api_key"]
+    github_client = request.app["github_client"]
     eggtray_url = request.app["eggtray_url"]
     debug = request.app["debug"]
 
     try:
         eggtray_owner, eggtray_repo = parse_eggtray_url(eggtray_url)
-        github = GitHub(github_api_key) if github_api_key else GitHub()
 
         logger.info(
             f"Fetching issue #{issue_number} from {eggtray_owner}/{eggtray_repo}"
         )
         try:
-            issue = github.rest.issues.get(
+            issue = github_client.rest.issues.get(
                 owner=eggtray_owner,
                 repo=eggtray_repo,
                 issue_number=issue_number,
@@ -210,7 +163,7 @@ async def get_check_status(request: Request) -> Response:
             f"Getting comments of issue #{issue_number} ({issue_data.state}) to check for summary"
         )
 
-        comments = github.rest.issues.list_comments(
+        comments = github_client.rest.issues.list_comments(
             owner=eggtray_owner,
             repo=eggtray_repo,
             issue_number=issue_number,
