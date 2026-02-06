@@ -1,27 +1,45 @@
+import hashlib
+import json
 import logging
-import os
+import re
+from datetime import UTC, datetime
+from enum import StrEnum
 
-from aiohttp.web import Request, Response, RouteTableDef, json_response
+from aiohttp.web import Application, Request, Response, RouteTableDef, json_response
 from githubkit import GitHub
-from githubkit.exception import RequestFailed
 
 
-GITHUB_API_KEY = os.getenv("GITHUB_API_KEY") or None
-DEBUG = os.getenv("DEBUG", "").lower() in ("1", "true", "yes")
+LAUNCH_AT = datetime.now(UTC)
 
-EGGTRAY_OWNER = "juniorguru"
-EGGTRAY_REPO = "eggtray"
 
 logger = logging.getLogger("jg.chick.api")
 
+
+class CheckStatus(StrEnum):
+    PENDING = "pending"
+    COMPLETE = "complete"
+
+
+web = Application()
 routes = RouteTableDef()
 
 
-def get_github_client() -> GitHub:
-    """Create and return a GitHub client instance."""
-    if GITHUB_API_KEY:
-        return GitHub(GITHUB_API_KEY)
-    return GitHub()
+def generate_error_hash(error: Exception) -> str:
+    """Generate a unique hash for an error for tracking purposes."""
+    error_string = f"{datetime.now(UTC).isoformat()}-{type(error).__name__}-{str(error)}"
+    return hashlib.sha256(error_string.encode()).hexdigest()[:8]
+
+
+@routes.get("/")
+async def index(request: Request) -> Response:
+    logger.info(f"Received {request!r}")
+    return json_response(
+        {
+            "status": "ok",
+            "launch_at": LAUNCH_AT.isoformat(),
+            "uptime_sec": (datetime.now(UTC) - LAUNCH_AT).seconds,
+        }
+    )
 
 
 @routes.post("/checks/{github_username}")
@@ -30,19 +48,25 @@ async def create_check(request: Request) -> Response:
     github_username = request.match_info["github_username"]
     logger.info(f"Creating check for GitHub username: {github_username}")
 
+    github_api_key = request.app["github_api_key"]
+    eggtray_owner = request.app["eggtray_owner"]
+    eggtray_repo = request.app["eggtray_repo"]
+    debug = request.app["debug"]
+
     try:
-        github = get_github_client()
+        github = GitHub(github_api_key) if github_api_key else GitHub()
 
         # Create issue with the specified format
         title = f"Zpětná vazba na profil @{github_username}"
         body = f"Z webu junior.guru přišel požadavek na zpětnou vazbu k profilu @{github_username}."
 
-        logger.debug(f"Creating issue in {EGGTRAY_OWNER}/{EGGTRAY_REPO}")
+        logger.debug(f"Creating issue in {eggtray_owner}/{eggtray_repo}")
         issue = github.rest.issues.create(
-            owner=EGGTRAY_OWNER,
-            repo=EGGTRAY_REPO,
+            owner=eggtray_owner,
+            repo=eggtray_repo,
             title=title,
             body=body,
+            labels=["check"],
         )
 
         issue_data = issue.parsed_data
@@ -55,20 +79,13 @@ async def create_check(request: Request) -> Response:
             }
         )
 
-    except RequestFailed as e:
-        logger.error(f"GitHub API error creating issue: {e}")
-        if DEBUG:
-            raise
-        return json_response(
-            {"error": "Failed to create GitHub issue"},
-            status=500,
-        )
     except Exception as e:
-        logger.error(f"Unexpected error creating check: {e}")
-        if DEBUG:
+        error_hash = generate_error_hash(e)
+        logger.error(f"Error creating check [{error_hash}]: {e}")
+        if debug:
             raise
         return json_response(
-            {"error": "Internal server error"},
+            {"error": "Internal server error", "hash": error_hash},
             status=500,
         )
 
@@ -86,21 +103,26 @@ async def get_check_status(request: Request) -> Response:
 
     logger.info(f"Getting check status for issue #{issue_number}")
 
+    github_api_key = request.app["github_api_key"]
+    eggtray_owner = request.app["eggtray_owner"]
+    eggtray_repo = request.app["eggtray_repo"]
+    debug = request.app["debug"]
+
     try:
-        github = get_github_client()
+        github = GitHub(github_api_key) if github_api_key else GitHub()
 
         # Try to get the issue
-        logger.debug(
-            f"Fetching issue #{issue_number} from {EGGTRAY_OWNER}/{EGGTRAY_REPO}"
+        logger.info(
+            f"Fetching issue #{issue_number} from {eggtray_owner}/{eggtray_repo}"
         )
         try:
             issue = github.rest.issues.get(
-                owner=EGGTRAY_OWNER,
-                repo=EGGTRAY_REPO,
+                owner=eggtray_owner,
+                repo=eggtray_repo,
                 issue_number=issue_number,
             )
-        except RequestFailed as e:
-            if e.response.status_code == 404:
+        except Exception as e:
+            if "404" in str(e) or "Not Found" in str(e):
                 logger.info(f"Issue #{issue_number} not found")
                 return json_response(
                     {"error": "Issue not found"},
@@ -113,18 +135,18 @@ async def get_check_status(request: Request) -> Response:
 
         # Get comments to check for summary
         comments = github.rest.issues.list_comments(
-            owner=EGGTRAY_OWNER,
-            repo=EGGTRAY_REPO,
+            owner=eggtray_owner,
+            repo=eggtray_repo,
             issue_number=issue_number,
         )
 
         # Find the last summary comment (from the bot)
-        # Looking for comments that contain the summary table
+        # Looking for comments that contain the JSON code block
         summary_comment = None
         for comment in reversed(comments.parsed_data):
             comment_body = comment.body or ""
-            # Check if this is a summary comment (contains the table with verdicts)
-            if "| Verdikt | Popis | Vysvětlení |" in comment_body:
+            # Parse the comment to find the code block with JSON
+            if "```json" in comment_body:
                 summary_comment = comment
                 break
 
@@ -132,47 +154,60 @@ async def get_check_status(request: Request) -> Response:
             # Check is complete - return 200 with the summary data
             logger.info(f"Check #{issue_number} is complete")
 
-            # Parse the summary comment to extract structured data
-            # For now, we'll return the raw comment body
-            # In the future, this could be parsed into structured JSON
-            return json_response(
-                {
-                    "status": "complete",
-                    "comment": {
-                        "id": summary_comment.id,
-                        "body": summary_comment.body,
-                        "created_at": summary_comment.created_at.isoformat()
-                        if summary_comment.created_at
-                        else None,
-                        "html_url": summary_comment.html_url,
-                    },
-                },
-                status=200,
+            # Extract JSON from the code block
+            comment_body = summary_comment.body
+            json_match = re.search(
+                r"```json\s*\n(.*?)\n```", comment_body, re.DOTALL
             )
+
+            summary_data = None
+            if json_match:
+                try:
+                    summary_data = json.loads(json_match.group(1))
+                except json.JSONDecodeError:
+                    logger.warning(
+                        f"Failed to parse JSON from comment {summary_comment.id}"
+                    )
+
+            # Extract GitHub Actions URL
+            actions_url = None
+            actions_match = re.search(
+                r"https://github\.com/juniorguru/eggtray/actions/runs/(\d+)",
+                comment_body,
+            )
+            if actions_match:
+                actions_url = actions_match.group(0)
+
+            response_data = {
+                "status": CheckStatus.COMPLETE,
+            }
+
+            if summary_data:
+                response_data["data"] = summary_data
+
+            if actions_url:
+                response_data["actions_url"] = actions_url
+
+            return json_response(response_data, status=200)
         else:
             # Check is still in progress - return 202
             logger.info(f"Check #{issue_number} is still in progress")
             return json_response(
                 {
-                    "status": "pending",
-                    "message": "Check is still in progress",
+                    "status": CheckStatus.PENDING,
                 },
                 status=202,
             )
 
-    except RequestFailed as e:
-        logger.error(f"GitHub API error getting check status: {e}")
-        if DEBUG:
-            raise
-        return json_response(
-            {"error": "Failed to get check status from GitHub"},
-            status=500,
-        )
     except Exception as e:
-        logger.error(f"Unexpected error getting check status: {e}")
-        if DEBUG:
+        error_hash = generate_error_hash(e)
+        logger.error(f"Error getting check status [{error_hash}]: {e}")
+        if debug:
             raise
         return json_response(
-            {"error": "Internal server error"},
+            {"error": "Internal server error", "hash": error_hash},
             status=500,
         )
+
+
+web.add_routes(routes)

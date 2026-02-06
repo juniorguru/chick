@@ -14,6 +14,8 @@ All junior.guru automation happens asynchronously (with up-to-24h delay) in the 
 - [x] Greeting new members in #ahoj
 - [x] Providing reviews in #cv-github-linkedin
 - [x] Automatically adding role members to interest threads
+- [x] API endpoint for creating GitHub profile review requests
+- [x] API endpoint for checking GitHub profile review status
 - [ ] Saving pins to members' DMs [#13](https://github.com/juniorguru/juniorguru-chick/issues/13)
 
 _Please, update the above list if adding features._

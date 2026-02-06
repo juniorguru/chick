@@ -5,16 +5,25 @@ import subprocess
 import click
 from aiohttp.web import AppRunner, TCPSite
 
+from jg.chick.api import web
 from jg.chick.bot import bot
-from jg.chick.web import web
 
 
 logger = logging.getLogger("jg.chick")
 
 
-async def run(host, port, discord_api_key) -> None:
+async def run(
+    host, port, discord_api_key, github_api_key, eggtray_owner, eggtray_repo, debug
+) -> None:
     # inspired by https://stackoverflow.com/a/54462411/325365
     logger.info(f"Starting the web app at {host}:{port}")
+
+    # Configure web app
+    web["github_api_key"] = github_api_key
+    web["eggtray_owner"] = eggtray_owner
+    web["eggtray_repo"] = eggtray_repo
+    web["debug"] = debug
+
     runner = AppRunner(web)
     await runner.setup()
     site = TCPSite(runner, host, port)
@@ -65,8 +74,32 @@ async def run(host, port, discord_api_key) -> None:
     envvar="DISCORD_API_KEY",
     help="Discord API key.",
 )
+@click.option(
+    "--github-api-key",
+    envvar="GITHUB_API_KEY",
+    help="GitHub API key.",
+)
+@click.option(
+    "--eggtray-owner",
+    envvar="EGGTRAY_OWNER",
+    default="juniorguru",
+    help="GitHub owner for eggtray repository.",
+)
+@click.option(
+    "--eggtray-repo",
+    envvar="EGGTRAY_REPO",
+    default="eggtray",
+    help="GitHub repository name for eggtray.",
+)
 def main(
-    debug: bool, production: bool, host: str, port: int, discord_api_key: str
+    debug: bool,
+    production: bool,
+    host: str,
+    port: int,
+    discord_api_key: str,
+    github_api_key: str,
+    eggtray_owner: str,
+    eggtray_repo: str,
 ) -> None:
     logging.basicConfig()
     logging.getLogger("jg").setLevel(logging.DEBUG if debug else logging.INFO)
@@ -78,7 +111,17 @@ def main(
 
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(run(host, port, discord_api_key))
+        loop.run_until_complete(
+            run(
+                host,
+                port,
+                discord_api_key,
+                github_api_key,
+                eggtray_owner,
+                eggtray_repo,
+                debug,
+            )
+        )
     except KeyboardInterrupt:
         logger.info("Terminating")
     finally:
