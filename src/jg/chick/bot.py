@@ -223,12 +223,12 @@ async def on_thread_message(
         if interest := bot.interests.get(thread.id):
             logger.info(f"Noticed message in interest thread {thread.name!r}")
             if interests.should_notify(interest, now):
-                logger.info("Clearing recent bot messages")
-                await clear_recent_bot_messages(thread, now=now)
                 missing_members = await get_missing_members(thread, interest["role_id"])
                 if len(missing_members) <= 1:
                     logger.info(f"Not adding, too few: {len(missing_members)}")
                 else:
+                    logger.info("Clearing recent bot messages")
+                    await clear_recent_bot_messages(thread, now=now)
                     logger.info(f"Adding role #{interest['role_id']}")
                     mentions_text = " ".join([m.mention for m in missing_members])
                     adding_message = (
