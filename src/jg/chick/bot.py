@@ -224,7 +224,7 @@ async def on_thread_message(
             if interests.should_notify(interest, now):
                 logger.info("Clearing recent bot messages")
                 await clear_bot_messages(thread)
-                missing_members = get_missing_members(thread, interest["role_id"])
+                missing_members = await get_missing_members(thread, interest["role_id"])
                 if len(missing_members) <= 1:
                     logger.info(f"Not adding, too few: {len(missing_members)}")
                 else:

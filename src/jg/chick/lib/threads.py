@@ -77,7 +77,9 @@ async def ensure_thread_name(thread: discord.Thread, name_template) -> str | Non
         return None
 
 
-def get_missing_members(thread: discord.Thread, role_id: int) -> list[discord.Member]:
+async def get_missing_members(
+    thread: discord.Thread, role_id: int
+) -> list[discord.Member]:
     """Returns role members who are not in the thread"""
     if not thread.parent:
         raise ValueError(f"Thread {thread.jump_url} has no parent channel")
@@ -87,7 +89,8 @@ def get_missing_members(thread: discord.Thread, role_id: int) -> list[discord.Me
     if not role:
         raise ValueError(f"Role #{role_id} not found in guild {guild.name!r}")
 
-    thread_members_ids = {member.id for member in thread.members}
+    thread_members = await thread.fetch_members()
+    thread_members_ids = {member.id for member in thread_members}
     return [member for member in role.members if member.id not in thread_members_ids]
 
 
