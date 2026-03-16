@@ -105,7 +105,7 @@ async def clear_recent_bot_messages(
     await thread.purge(
         limit=limit_count,
         after=after,
-        check=lambda m: m.author == thread.guild.me,
+        check=lambda m: m.author == thread.guild.me and not m.is_system(),
         reason="Clearing recent bot messages",
     )
 
