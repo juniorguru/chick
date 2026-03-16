@@ -127,23 +127,58 @@ async def unfollow(context: discord.ApplicationContext):
         role = cast(discord.Role, guild.get_role(interest["role_id"]))
     except (AttributeError, KeyError):
         await context.respond(
-            "Píp, promiň, ale tenhle příkaz funguje jenom v zájmových skupinkách.",
-            delete_after=60,
+            (
+                "Píp, promiň, ale tenhle příkaz funguje jenom "
+                "v zájmových vláknech uvnitř <#1075087563645263922>. "
+                "Pokud už tě nebaví např. Python, jdi do jeho vlákna "
+                "a tam použij `/unfollow`."
+            ),
+            delete_after=30,
         )
         return
 
     if role in member.roles:
         await member.remove_roles(role, reason="User requested /unfollow")
-
+    await thread.remove_user(member)
     await context.respond(
         (
-            "Odhlásilo jsem tě z téhle zájmové skupinky. "
-            "Kdykoliv se můžeš znovu přidat tím, že půjdeš "
-            f"do <id:customize> a dáš si roli „{role.name}“."
+            "Odhlásilo jsem tě z téhle zájmové skupinky. Odebralo "
+            f"jsem ti roli „{role.name}“ a vyhodilo z tohoto vlákna. "
+            "Kdyby tě téma začalo zase zajímat, spusť tady `/follow`."
         ),
-        delete_after=60,
+        delete_after=30,
     )
-    await thread.remove_user(member)
+
+
+@bot.slash_command(description="Přihlásí tě do zájmové skupinky")
+async def follow(context: discord.ApplicationContext):
+    try:
+        guild = cast(discord.Guild, context.guild)
+        member = await guild.fetch_member(context.author.id)
+        thread = cast(discord.Thread, context.channel)
+        interest = bot.interests[thread.id]
+        role = cast(discord.Role, guild.get_role(interest["role_id"]))
+    except (AttributeError, KeyError):
+        await context.respond(
+            (
+                "Píp, promiň, ale tenhle příkaz funguje jenom "
+                "v zájmových skupinkách. Uvnitř <#1075087563645263922> "
+                "si najdi vlákno např. o Pythonu a v něm použij `/follow`."
+            ),
+            delete_after=30,
+        )
+        return
+
+    if role not in member.roles:
+        await member.add_roles(role, reason="User requested /follow")
+    await context.respond(
+        (
+            "Přihlásilo jsem tě do téhle zájmové skupinky. Dalo "
+            f"jsem ti roli „{role.name}“ a přidalo tě sem do vlákna. "
+            "Kdyby tě téma přestalo zajímat, spusť tady `/unfollow`."
+        ),
+        delete_after=30,
+    )
 
 
 @tasks.loop(hours=6)
