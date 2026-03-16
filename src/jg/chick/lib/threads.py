@@ -77,8 +77,8 @@ async def ensure_thread_name(thread: discord.Thread, name_template) -> str | Non
         return None
 
 
-async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
-    """Adds members of given role to given thread"""
+def get_missing_members(thread: discord.Thread, role_id: int) -> list[discord.Member]:
+    """Returns role members who are not in the thread"""
     if not thread.parent:
         raise ValueError(f"Thread {thread.jump_url} has no parent channel")
 
@@ -88,30 +88,7 @@ async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
         raise ValueError(f"Role #{role_id} not found in guild {guild.name!r}")
 
     thread_members_ids = {member.id for member in thread.members}
-    mentions = [
-        member.mention
-        for member in role.members
-        if member.id not in thread_members_ids
-    ]
-    if not mentions:
-        return
-
-    mentions_text = " ".join(mentions)
-    if len(mentions) > 1:
-        message = (
-            f"{mentions_text} přidávám vás, protože jste si "
-            "v <id:customize> vybrali, že vás zajímá tohle téma. "
-            "Pokud vás to tu přestane bavit, spusťte tady příkaz "
-            "`/unfollow` a já vás odeberu."
-        )
-    else:
-        message = (
-            f"{mentions_text} přidávám tě, protože máš "
-            "v <id:customize> vybráno, že tě zajímá tohle téma. "
-            "Pokud tě to tu přestane bavit, spusť tady příkaz "
-            "`/unfollow` a já tě odeberu."
-        )
-    await thread.send(message, silent=True)
+    return [member for member in role.members if member.id not in thread_members_ids]
 
 
 async def clear_bot_messages(thread: discord.Thread, limit: int = 10) -> None:

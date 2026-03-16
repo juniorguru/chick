@@ -25,10 +25,10 @@ from jg.chick.lib.reviews import (
     prepare_tags,
 )
 from jg.chick.lib.threads import (
-    add_members_with_role,
     clear_bot_messages,
     ensure_thread_name,
     fetch_starting_message,
+    get_missing_members,
     is_thread_created,
     name_thread,
     ping_members_with_role,
@@ -224,8 +224,19 @@ async def on_thread_message(
             if interests.should_notify(interest, now):
                 logger.info("Clearing recent bot messages")
                 await clear_bot_messages(thread)
-                logger.info(f"Adding role #{interest['role_id']}")
-                await add_members_with_role(thread, interest["role_id"])
+                missing_members = get_missing_members(thread, interest["role_id"])
+                if len(missing_members) <= 1:
+                    logger.info(f"Not adding, too few: {len(missing_members)}")
+                else:
+                    logger.info(f"Adding role #{interest['role_id']}")
+                    mentions_text = " ".join([m.mention for m in missing_members])
+                    adding_message = (
+                        f"{mentions_text} přidávám vás, protože jste si "
+                        "v <id:customize> vybrali, že vás zajímá tohle téma. "
+                        "Pokud vás to tu přestane bavit, spusťte tady příkaz "
+                        "`/unfollow` a já vás odeberu."
+                    )
+                    await thread.send(adding_message, silent=True)
                 interest["last_notified_at"] = now
             else:
                 logger.info("Not adding due to cooldown")
