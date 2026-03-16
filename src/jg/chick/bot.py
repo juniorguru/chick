@@ -31,6 +31,7 @@ from jg.chick.lib.threads import (
     is_thread_created,
     name_thread,
     ping_members_with_role,
+    remove_member,
 )
 
 
@@ -115,6 +116,35 @@ async def discord_id(context: discord.ApplicationContext):
         "Až si budeš zakládat profil v [seznamu kandidátů](https://junior.guru/candidates/), "
         "bude se ti tahle informace hodit <a:awkward:985064290044223488>"
     )
+
+
+@bot.slash_command(description="Odhlásí tě ze zájmové skupinky")
+async def unfollow(context: discord.ApplicationContext):
+    try:
+        guild = cast(discord.Guild, context.guild)
+        member = await guild.fetch_member(context.author.id)
+        thread = cast(discord.Thread, context.channel)
+        interest = bot.interests[thread.id]
+        role = cast(discord.Role, guild.get_role(interest["role_id"]))
+    except (AttributeError, KeyError):
+        await context.respond(
+            "Píp, promiň, ale tenhle příkaz funguje jenom v zájmových skupinkách.",
+            delete_after=60,
+        )
+        return
+
+    if role in member.roles:
+        await member.remove_roles(role, reason="User requested /unfollow")
+
+    await context.respond(
+        (
+            "Odhlásilo jsem tě z téhle zájmové skupinky. "
+            "Kdykoliv se můžeš znovu přidat tím, že půjdeš "
+            f"do <id:customize> a dáš si roli „{role.name}“."
+        ),
+        delete_after=60,
+    )
+    asyncio.create_task(remove_member(thread, member, delay_seconds=30))
 
 
 @tasks.loop(hours=6)

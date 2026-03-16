@@ -1,7 +1,12 @@
+import asyncio
+import logging
 import re
 from datetime import datetime
 
 import discord
+
+
+logger = logging.getLogger("jg.chick.threads")
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
@@ -97,3 +102,12 @@ async def ping_members_with_role(thread: discord.Thread, role_id: int) -> None:
     """Adds and pings members of given role to given thread"""
     message = await thread.send(f"<@&{role_id}>", silent=True)
     await message.delete()
+
+
+async def remove_member(
+    thread: discord.Thread, member: discord.abc.Snowflake, delay_seconds: int = 0
+) -> None:
+    """Removes given member from given thread, optionally after delay."""
+    if delay_seconds > 0:
+        await asyncio.sleep(delay_seconds)
+    await thread.remove_user(member)
