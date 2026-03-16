@@ -87,9 +87,9 @@ async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
     if not role:
         raise ValueError(f"Role #{role_id} not found in guild {guild.name!r}")
 
-    thread_members_ids = [member.id for member in thread.members]
+    thread_members_ids = {member.id for member in thread.members}
     mentions = [
-        f"@{member.id}"
+        member.mention
         for member in role.members
         if member.id not in thread_members_ids
     ]
