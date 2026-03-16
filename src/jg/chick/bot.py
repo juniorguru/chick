@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from collections.abc import Coroutine
 from datetime import UTC, datetime
 from typing import cast
 
@@ -32,7 +31,6 @@ from jg.chick.lib.threads import (
     is_thread_created,
     name_thread,
     ping_members_with_role,
-    remove_member,
 )
 
 
@@ -54,25 +52,6 @@ class ChickBot(commands.Bot):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.interests: interests.Interests = {}
-        self._background_tasks: set[asyncio.Task[None]] = set()
-
-    def create_background_task(
-        self, coroutine: Coroutine[object, object, None], *, name: str
-    ) -> asyncio.Task[None]:
-        task = asyncio.create_task(coroutine, name=name)
-        self._background_tasks.add(task)
-
-        def _on_done(done_task: asyncio.Task[None]) -> None:
-            self._background_tasks.discard(done_task)
-            try:
-                done_task.result()
-            except asyncio.CancelledError:
-                logger.info(f"Background task {done_task.get_name()!r} was cancelled")
-            except Exception:
-                logger.exception(f"Background task {done_task.get_name()!r} failed")
-
-        task.add_done_callback(_on_done)
-        return task
 
 
 bot = ChickBot(intents=intents)
@@ -164,10 +143,7 @@ async def unfollow(context: discord.ApplicationContext):
         ),
         delete_after=60,
     )
-    bot.create_background_task(
-        remove_member(thread, member, delay_seconds=30),
-        name=f"unfollow-remove-member:{thread.id}:{member.id}",
-    )
+    await thread.remove_user(member)
 
 
 @tasks.loop(hours=6)
