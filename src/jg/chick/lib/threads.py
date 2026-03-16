@@ -101,15 +101,15 @@ async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
         message = (
             f"{mentions_text} přidávám vás, protože jste si "
             "v <id:customize> vybrali, že vás zajímá tohle téma. "
-            "Pokud vás to tu přestane bavit, tak si upravte zájmy. "
-            "Nebo tady spusťte příkaz `/unfollow` a já vás odeberu."
+            "Pokud vás to tu přestane bavit, spusťte tady příkaz "
+            "`/unfollow` a já vás odeberu."
         )
     else:
         message = (
             f"{mentions_text} přidávám tě, protože máš "
             "v <id:customize> vybráno, že tě zajímá tohle téma. "
-            "Pokud tě to tu přestane bavit, tak si uprav zájmy. "
-            "Nebo tady spusť příkaz `/unfollow` a já tě odeberu."
+            "Pokud tě to tu přestane bavit, spusť tady příkaz "
+            "`/unfollow` a já tě odeberu."
         )
     await thread.send(message, silent=True)
 
