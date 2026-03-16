@@ -105,14 +105,14 @@ async def on_message(message: discord.Message):
 @bot.slash_command(description="Nápověda k použití kuřete")
 async def help(context: discord.ApplicationContext):
     await context.respond(
-        "Píp píp píp! Všechno se dovíš v [dokumentaci na webu](https://junior.guru/about/bot/) 📖"
+        "-# Píp píp píp! Všechno se dovíš v [dokumentaci na webu](https://junior.guru/about/bot/) 📖"
     )
 
 
 @bot.slash_command(description="Jaké je tvoje Discord ID?")
 async def discord_id(context: discord.ApplicationContext):
     await context.respond(
-        f"Tvoje Discord ID je `{context.author.id}`. "
+        f"-# Tvoje Discord ID je `{context.author.id}`. "
         "Až si budeš zakládat profil v [seznamu kandidátů](https://junior.guru/candidates/), "
         "bude se ti tahle informace hodit <a:awkward:985064290044223488>"
     )
@@ -129,7 +129,7 @@ async def unfollow(context: discord.ApplicationContext):
     except (AttributeError, KeyError):
         await context.respond(
             (
-                "Píp, promiň, ale tenhle příkaz funguje jenom "
+                "-# Píp, promiň, ale tenhle příkaz funguje jenom "
                 "v zájmových vláknech uvnitř <#1075087563645263922>. "
                 "Pokud už tě nebaví např. Python, jdi do jeho vlákna "
                 "a tam použij `/unfollow`."
@@ -143,7 +143,7 @@ async def unfollow(context: discord.ApplicationContext):
     await thread.remove_user(member)
     await context.respond(
         (
-            "Odhlásilo jsem tě z téhle zájmové skupinky. Odebralo "
+            "-# Odhlásilo jsem tě z téhle zájmové skupinky. Odebralo "
             f"jsem ti roli „{role.name}“ a vyhodilo z tohoto vlákna. "
             "Kdyby tě téma začalo zase zajímat, spusť tady `/follow`."
         ),
@@ -162,7 +162,7 @@ async def follow(context: discord.ApplicationContext):
     except (AttributeError, KeyError):
         await context.respond(
             (
-                "Píp, promiň, ale tenhle příkaz funguje jenom "
+                "-# Píp, promiň, ale tenhle příkaz funguje jenom "
                 "v zájmových skupinkách. Uvnitř <#1075087563645263922> "
                 "si najdi vlákno např. o Pythonu a v něm použij `/follow`."
             ),
@@ -174,7 +174,7 @@ async def follow(context: discord.ApplicationContext):
         await member.add_roles(role, reason="User requested /follow")
     await context.respond(
         (
-            "Přihlásilo jsem tě do téhle zájmové skupinky. Dalo "
+            "-# Přihlásilo jsem tě do téhle zájmové skupinky. Dalo "
             f"jsem ti roli „{role.name}“ a přidalo tě sem do vlákna. "
             "Kdyby tě téma přestalo zajímat, spusť tady `/unfollow`."
         ),
@@ -194,13 +194,14 @@ async def refetch_interests():
 
 async def on_dm_message(bot_user: discord.ClientUser, message: discord.Message):
     try:
-        response = (
-            "Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně. "
-            "Tvou zprávu si nikdo nepřečte. Pokud se chceš na něco zeptat, zkus kanál "
-            "https://discord.com/channels/769966886598737931/806215364379148348 "
-            "nebo napiš do soukromé zprávy komukoliv z moderátorů. Rádi tě nasměrují."
+        await message.reply(
+            (
+                "Píp píp píp! Jsem jen malé kuřátko, které neumí číst soukromé zprávy a odpovídat na ně. "
+                "Tvou zprávu si nikdo nepřečte. Pokud se chceš na něco zeptat, zkus kanál "
+                "https://discord.com/channels/769966886598737931/806215364379148348 "
+                "nebo napiš do soukromé zprávy komukoliv z moderátorů. Rádi tě nasměrují."
+            )
         )
-        await message.reply(response)
     except discord.errors.Forbidden:
         logger.warning("User has DMs disabled, skipping")
 
@@ -231,7 +232,7 @@ async def on_thread_message(
                     logger.info(f"Adding role #{interest['role_id']}")
                     mentions_text = " ".join([m.mention for m in missing_members])
                     adding_message = (
-                        f"{mentions_text} přidávám vás, protože jste si "
+                        f"-# {mentions_text} přidávám vás, protože jste si "
                         "v <id:customize> vybrali, že vás zajímá tohle téma. "
                         "Pokud vás to tu přestane bavit, spusťte tady příkaz "
                         "`/unfollow` a já vás odeberu."
