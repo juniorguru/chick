@@ -88,9 +88,39 @@ async def add_members_with_role(thread: discord.Thread, role_id: int) -> None:
         raise ValueError(f"Role #{role_id} not found in guild {guild.name!r}")
 
     thread_members_ids = [member.id for member in thread.members]
-    for member in role.members:
-        if member.id not in thread_members_ids:
-            await thread.add_user(member)
+    mentions = [
+        f"@{member.id}"
+        for member in role.members
+        if member.id not in thread_members_ids
+    ]
+    if not mentions:
+        return
+
+    mentions_text = " ".join(mentions)
+    if len(mentions) > 1:
+        message = (
+            f"{mentions_text} přidávám vás, protože jste si "
+            "v <id:customize> vybrali, že vás zajímá tohle téma. "
+            "Pokud vás to tu přestane bavit, tak si upravte zájmy. "
+            "Nebo tady spusťte příkaz `/unfollow` a já vás odeberu."
+        )
+    else:
+        message = (
+            f"{mentions_text} přidávám tě, protože máš "
+            "v <id:customize> vybráno, že tě zajímá tohle téma. "
+            "Pokud tě to tu přestane bavit, tak si uprav zájmy. "
+            "Nebo tady spusť příkaz `/unfollow` a já tě odeberu."
+        )
+    await thread.send(message, silent=True)
+
+
+async def clear_bot_messages(thread: discord.Thread, limit: int = 10) -> None:
+    """Clears messages sent by the bot in given thread"""
+    await thread.purge(
+        limit=limit,
+        check=lambda m: m.author == thread.guild.me,
+        reason="Clearing recent bot messages",
+    )
 
 
 async def ping_members_with_role(thread: discord.Thread, role_id: int) -> None:

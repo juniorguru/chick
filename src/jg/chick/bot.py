@@ -26,6 +26,7 @@ from jg.chick.lib.reviews import (
 )
 from jg.chick.lib.threads import (
     add_members_with_role,
+    clear_bot_messages,
     ensure_thread_name,
     fetch_starting_message,
     is_thread_created,
@@ -221,6 +222,8 @@ async def on_thread_message(
         if interest := bot.interests.get(thread.id):
             logger.info(f"Noticed message in interest thread {thread.name!r}")
             if interests.should_notify(interest, now):
+                logger.info("Clearing recent bot messages")
+                await clear_bot_messages(thread)
                 logger.info(f"Adding role #{interest['role_id']}")
                 await add_members_with_role(thread, interest["role_id"])
                 interest["last_notified_at"] = now
