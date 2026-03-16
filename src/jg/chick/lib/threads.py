@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 import discord
 
@@ -94,10 +94,17 @@ async def get_missing_members(
     return [member for member in role.members if member.id not in thread_members_ids]
 
 
-async def clear_bot_messages(thread: discord.Thread, limit: int = 10) -> None:
+async def clear_recent_bot_messages(
+    thread: discord.Thread,
+    limit_count: int = 10,
+    limit_days: int = 60,
+    now: datetime | None = None,
+) -> None:
     """Clears messages sent by the bot in given thread"""
+    after = (now or datetime.now(UTC)) - timedelta(days=limit_days)
     await thread.purge(
-        limit=limit,
+        limit=limit_count,
+        after=after,
         check=lambda m: m.author == thread.guild.me,
         reason="Clearing recent bot messages",
     )
