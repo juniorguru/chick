@@ -1,12 +1,8 @@
 import asyncio
-import logging
 import re
 from datetime import datetime
 
 import discord
-
-
-logger = logging.getLogger("jg.chick.threads")
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
