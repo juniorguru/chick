@@ -25,7 +25,6 @@ from jg.chick.lib.reviews import (
     prepare_tags,
 )
 from jg.chick.lib.threads import (
-    clear_recent_bot_messages,
     ensure_thread_name,
     fetch_starting_message,
     get_missing_members,
@@ -227,8 +226,9 @@ async def on_thread_message(
                 if len(missing_members) <= 1:
                     logger.info(f"Not adding, too few: {len(missing_members)}")
                 else:
-                    logger.info("Clearing recent bot messages")
-                    await clear_recent_bot_messages(thread, now=now)
+                    # TODO hotfix, deletes also messages which are not related to the interest notification
+                    # logger.info("Clearing recent bot messages")
+                    # await clear_recent_bot_messages(thread, now=now)
                     logger.info(f"Adding role #{interest['role_id']}")
                     mentions_text = " ".join([m.mention for m in missing_members])
                     adding_message = (
