@@ -62,4 +62,3 @@ async def test_generate_intro_message_with_gh_connection_suggestion():
     assert gh_connection_snippet in bot_message_content
     assert tips_snippet in bot_message_content
     assert footer_snippet in bot_message_content
-    assert bot_message_content in bot_message_content

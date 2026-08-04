@@ -13,6 +13,7 @@ dependencies = [
     "jg.hen@git+https://github.com/juniorguru/hen.git",
     "py-cord[speed]@git+https://github.com/Pycord-Development/pycord.git",
     "pydantic>=2.13.0",
+    "tzdata>=2025.2",
 ]
 
 [project.urls]

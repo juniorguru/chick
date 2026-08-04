@@ -4,7 +4,7 @@ from typing import cast
 import discord
 import pytest
 
-from jg.chick.lib.threads import name_thread
+from jg.chick.lib.threads import TIMEZONE, name_thread
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
@@ -19,7 +19,7 @@ class Message:
 
 def test_name_thread_no_brackets():
     content = "Hello this is my thread"
-    weekday = datetime.now().weekday()
+    weekday = datetime.now(TIMEZONE).weekday()
     name_template = "{weekday} objev od {author}"
     expected_name = f"{DAYS[weekday]} objev od Jana"
     message = cast(discord.Message, Message("Jana", content))
@@ -36,7 +36,7 @@ def test_name_thread_no_brackets():
     ],
 )
 def test_brackets_used_incorrectly(content: str):
-    weekday = datetime.now().weekday()
+    weekday = datetime.now(TIMEZONE).weekday()
     name_template = "{weekday} objev od {author}"
     expected_name = f"{DAYS[weekday]} objev od Jana"
     message = cast(discord.Message, Message("Jana", content))
@@ -46,7 +46,7 @@ def test_brackets_used_incorrectly(content: str):
 
 def test_no_text_in_brackets():
     content = "[] Hello this is my thread"
-    weekday = datetime.now().weekday()
+    weekday = datetime.now(TIMEZONE).weekday()
     name_template = "{weekday} objev od {author}"
     expected_name = f"{DAYS[weekday]} objev od Jana"
     message = cast(discord.Message, Message("Jana", content))
