@@ -1,10 +1,13 @@
 import re
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import discord
 
 
 DAYS = ["Pondělní", "Úterní", "Středeční", "Čtvrteční", "Páteční", "Sobotní", "Nedělní"]
+
+TIMEZONE = ZoneInfo("Europe/Prague")
 
 BRACKETS_RE = re.compile(
     r"""
@@ -42,6 +45,7 @@ def name_thread(
     message: discord.Message,
     name_template: str,
     bracket_name_template: str | None = None,
+    now: datetime | None = None,
 ) -> str:
     """
     If the message includes text in square brackets, use that as name for the thread.
@@ -58,7 +62,7 @@ def name_thread(
             author=message.author.display_name,
             bracket_content=name_from_brackets,
         )
-    weekday = datetime.now().weekday()
+    weekday = (now or datetime.now(TIMEZONE)).weekday()
     return name_template.format(
         weekday=DAYS[weekday],
         author=message.author.display_name,
