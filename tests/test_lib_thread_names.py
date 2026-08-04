@@ -17,14 +17,20 @@ class Message:
         self.content = message
 
 
-def test_name_thread_no_brackets():
+@pytest.fixture
+def now() -> datetime:
+    # A single fixed instant shared between the expected value and name_thread(),
+    # so the two can't land on different weekdays around midnight in Europe/Prague.
+    return datetime.now(TIMEZONE)
+
+
+def test_name_thread_no_brackets(now: datetime):
     content = "Hello this is my thread"
-    weekday = datetime.now(TIMEZONE).weekday()
     name_template = "{weekday} objev od {author}"
-    expected_name = f"{DAYS[weekday]} objev od Jana"
+    expected_name = f"{DAYS[now.weekday()]} objev od Jana"
     message = cast(discord.Message, Message("Jana", content))
 
-    assert name_thread(message, name_template) == expected_name
+    assert name_thread(message, name_template, now=now) == expected_name
 
 
 @pytest.mark.parametrize(
@@ -35,23 +41,21 @@ def test_name_thread_no_brackets():
         pytest.param("Hello this is my thread]", id="brackets not opened"),
     ],
 )
-def test_brackets_used_incorrectly(content: str):
-    weekday = datetime.now(TIMEZONE).weekday()
+def test_brackets_used_incorrectly(content: str, now: datetime):
     name_template = "{weekday} objev od {author}"
-    expected_name = f"{DAYS[weekday]} objev od Jana"
+    expected_name = f"{DAYS[now.weekday()]} objev od Jana"
     message = cast(discord.Message, Message("Jana", content))
 
-    assert name_thread(message, name_template) == expected_name
+    assert name_thread(message, name_template, now=now) == expected_name
 
 
-def test_no_text_in_brackets():
+def test_no_text_in_brackets(now: datetime):
     content = "[] Hello this is my thread"
-    weekday = datetime.now(TIMEZONE).weekday()
     name_template = "{weekday} objev od {author}"
-    expected_name = f"{DAYS[weekday]} objev od Jana"
+    expected_name = f"{DAYS[now.weekday()]} objev od Jana"
     message = cast(discord.Message, Message("Jana", content))
 
-    assert name_thread(message, name_template) == expected_name
+    assert name_thread(message, name_template, now=now) == expected_name
 
 
 @pytest.mark.parametrize(
