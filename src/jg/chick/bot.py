@@ -214,9 +214,13 @@ async def on_thread_message(
     now = datetime.now(UTC)
 
     if channel.name == "cv-github-linkedin" and bot_user.mention in message.content:
-        logger.info("Noticed mention in #cv-github-linkedin, starting review")
-        starting_message = (await fetch_starting_message(thread)) or message
-        await handle_review_thread(starting_message, thread)
+        if message.id == thread.id:
+            # the starting message is already handled in on_thread_create
+            logger.info("Mention in starting message of review thread, skipping")
+        else:
+            logger.info("Noticed mention in #cv-github-linkedin, starting review")
+            starting_message = (await fetch_starting_message(thread)) or message
+            await handle_review_thread(starting_message, thread)
 
     async with interests.modifications():
         if interest := bot.interests.get(thread.id):
