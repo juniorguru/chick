@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import subprocess
 
@@ -76,7 +75,7 @@ def main(
         logger.warning("Stopping production enviornment")
         subprocess.run(["flyctl", "machine", "stop"])
 
-    loop = asyncio.get_event_loop()
+    loop = bot.loop
     try:
         loop.run_until_complete(run(host, port, discord_api_key))
     except KeyboardInterrupt:
