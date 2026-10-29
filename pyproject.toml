@@ -5,7 +5,7 @@ description = "A real-time, synchronous junior.guru Discord bot"
 readme = "README.md"
 authors = [{name = "Honza Javorek", email = "honza@junior.guru"}]
 license = {text = "AGPL-3.0-only"}
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.15,<3.16"
 dependencies = [
     "aiohttp>=3.13.5",
     "click>=8.3.2",
@@ -37,7 +37,7 @@ addopts = "--import-mode=importlib --ff --ruff --ruff-format"
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py315"
 
 [tool.ruff.lint]
 extend-select = ["I"]

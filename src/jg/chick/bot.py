@@ -54,7 +54,7 @@ class ChickBot(commands.Bot):
         self.interests: interests.Interests = {}
 
 
-bot = ChickBot(intents=intents)
+bot = ChickBot(intents=intents, loop=asyncio.new_event_loop())
 
 
 @bot.event
@@ -125,7 +125,7 @@ async def unfollow(context: discord.ApplicationContext):
         thread = cast(discord.Thread, context.channel)
         interest = bot.interests[thread.id]
         role = cast(discord.Role, guild.get_role(interest["role_id"]))
-    except (AttributeError, KeyError):
+    except AttributeError, KeyError:
         await context.respond(
             (
                 "-# Píp, promiň, ale tenhle příkaz funguje jenom "
@@ -158,7 +158,7 @@ async def follow(context: discord.ApplicationContext):
         thread = cast(discord.Thread, context.channel)
         interest = bot.interests[thread.id]
         role = cast(discord.Role, guild.get_role(interest["role_id"]))
-    except (AttributeError, KeyError):
+    except AttributeError, KeyError:
         await context.respond(
             (
                 "-# Píp, promiň, ale tenhle příkaz funguje jenom "
