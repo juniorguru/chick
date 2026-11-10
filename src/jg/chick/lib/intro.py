@@ -23,16 +23,16 @@ PATTERNS_EMOJIS_MAPPING = {
         "<:php:842331754731274240>",
     ],
     re.compile(r"\bmysql\b", re.I): [
-        "<:mysql:1036337592582541314>",
+        "<:database:900833211809136641>",
     ],
     re.compile(r"\bmongo\w*\b", re.I): [
-        "<:mongodb:976200776118583348>",
+        "<:database:900833211809136641>",
     ],
     re.compile(r"\bpostgre\w+\b", re.I): [
-        "<:postgresql:900831229971169350>",
+        "<:database:900833211809136641>",
     ],
     re.compile(r"\bkubernet\w*\b", re.I): [
-        "<:kubernetes:976200847014899742>",
+        "<:docker:842465373911777290>",
     ],
     re.compile(r"\bdocker\w*\b", re.I): [
         "<:docker:842465373911777290>",
@@ -47,10 +47,10 @@ PATTERNS_EMOJIS_MAPPING = {
         "<:django:844534232297504779>",
     ],
     re.compile(r"\bflask\w*\b", re.I): [
-        "<:flask:1166303630001975367>",
+        "<:python:842331892091322389>",
     ],
     re.compile(r"\bpandas\b", re.I): [
-        "<:pandas:844567908688461854>",
+        "<:python:842331892091322389>",
     ],
     re.compile(r"\bexcel\w*\b", re.I): [
         "<:excel:960457644504674314>",
@@ -85,11 +85,9 @@ PATTERNS_EMOJIS_MAPPING = {
         "<:javascript:842329110293381142>",
     ],
     re.compile(r"\bbootstrap\w*\b", re.I): [
-        "<:bootstrap:900834695422545940>",
         "<:css:842343369618751519>",
     ],
     re.compile(r"\btailwind\w*\b", re.I): [
-        "<:tailwind:900834412248309770>",
         "<:css:842343369618751519>",
     ],
     re.compile(r"\bC\#\W"): [
@@ -114,10 +112,10 @@ PATTERNS_EMOJIS_MAPPING = {
         "<:vue:842332056138416168>",
     ],
     re.compile(r"\bangular\w*\b", re.I): [
-        "<:angular:844527194730266694>",
+        "<:typescript:842332083605995541>",
     ],
     re.compile(r"\bnext\.?js\b", re.I): [
-        "<:nextjs:963799617886121994>",
+        "<:react:842332165822742539>",
     ],
     re.compile(r"\bAPI\b"): [
         "<:api:900833604303732766>",

@@ -62,3 +62,22 @@ async def test_generate_intro_message_with_gh_connection_suggestion():
     assert gh_connection_snippet in bot_message_content
     assert tips_snippet in bot_message_content
     assert footer_snippet in bot_message_content
+
+
+@pytest.mark.parametrize(
+    "user_message_content, expected_emoji",
+    [
+        ("Zkouším MySQL", "<:database:900833211809136641>"),
+        ("Zkouším MongoDB", "<:database:900833211809136641>"),
+        ("Zkouším PostgreSQL", "<:database:900833211809136641>"),
+        ("Zkouším Kubernetes", "<:docker:842465373911777290>"),
+        ("Zkouším Flask", "<:python:842331892091322389>"),
+        ("Zkouším pandas", "<:python:842331892091322389>"),
+        ("Zkouším Next.js", "<:react:842332165822742539>"),
+        ("Zkouším Angular", "<:typescript:842332083605995541>"),
+        ("Zkouším Bootstrap", "<:css:842343369618751519>"),
+        ("Zkouším Tailwind", "<:css:842343369618751519>"),
+    ],
+)
+def test_choose_intro_emojis_fallbacks(user_message_content: str, expected_emoji: str):
+    assert expected_emoji in choose_intro_emojis(user_message_content)
